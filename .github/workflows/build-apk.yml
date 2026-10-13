@@ -133,7 +133,7 @@ jobs:
               )'''
               s = s[:start] + themes + s[end:]
 
-              s = s.replace('    var compact by remember { mutableStateOf(prefs.getBoolean("compact_rows", false)) }', '    var compact by remember { mutableStateOf(prefs.getBoolean("compact_rows", false)) }\n    var motionEnabled by remember { mutableStateOf(prefs.getBoolean("motion_effects", true))', 1)
+              s = s.replace('    var compact by remember { mutableStateOf(prefs.getBoolean("compact_rows", false)) }', '    var compact by remember { mutableStateOf(prefs.getBoolean("compact_rows", false)) }\n    var motionEnabled by remember { mutableStateOf(prefs.getBoolean("motion_effects", true)) }', 1)
               s = s.replace('''    fun setCompactRows(value: Boolean) {
                   compact = value
                   prefs.edit().putBoolean("compact_rows", value).apply()
