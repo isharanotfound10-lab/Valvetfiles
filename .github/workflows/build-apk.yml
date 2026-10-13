@@ -66,18 +66,62 @@ jobs:
             exit 1
           fi
 
-      - name: Patch missing Compose border import if needed
+      - name: Patch Compose import and hide pending media files
         shell: bash
         run: |
-          SOURCE_FILE="native-project/app/src/main/java/com/velvetfiles/app/MainActivity.kt"
-          if [ ! -f "$SOURCE_FILE" ]; then
-            echo "::error::MainActivity.kt was not found after extraction."
-            exit 1
-          fi
-          if ! grep -q '^import androidx.compose.foundation.border$' "$SOURCE_FILE"; then
-            sed -i '/^import androidx.compose.foundation.background$/a import androidx.compose.foundation.border' "$SOURCE_FILE"
-          fi
-          grep -n '^import androidx.compose.foundation.border$' "$SOURCE_FILE"
+          python3 - <<'PY'
+          from pathlib import Path
+
+          source = Path("native-project/app/src/main/java/com/velvetfiles/app/MainActivity.kt")
+          if not source.is_file():
+              raise SystemExit("MainActivity.kt was not found after extracting project ZIP")
+          code = source.read_text()
+
+          # Fix the known missing Compose border import in older source ZIPs.
+          if "import androidx.compose.foundation.border" not in code:
+              code = code.replace(
+                  "import androidx.compose.foundation.background",
+                  "import androidx.compose.foundation.background\nimport androidx.compose.foundation.border",
+                  1,
+              )
+
+          # Android can leave unpublished files named .pending-* on shared storage.
+          # Hide them in folder listings and recursive category/recent/search scans;
+          # never rename or delete the underlying files.
+          if "private fun isPendingTemporaryName(name: String)" not in code:
+              marker = "private fun listDirectory(folder: File, showHidden: Boolean = false): List<FileEntry> = try {"
+              if marker not in code:
+                  raise SystemExit("Could not locate listDirectory() to patch pending filenames")
+              code = code.replace(
+                  marker,
+                  'private fun isPendingTemporaryName(name: String): Boolean = name.startsWith(".pending-", ignoreCase = true)\n\n' + marker,
+                  1,
+              )
+
+          old_directory_filter = 'folder.listFiles()?.filter { it.canRead() && (showHidden || !it.name.startsWith(".")) }'
+          new_directory_filter = 'folder.listFiles()?.filter { it.canRead() && !isPendingTemporaryName(it.name) && (showHidden || !it.name.startsWith(".")) }'
+          if new_directory_filter not in code:
+              if old_directory_filter not in code:
+                  raise SystemExit("Could not locate folder listing filter for pending filenames")
+              code = code.replace(old_directory_filter, new_directory_filter, 1)
+
+          old_scan_filter = 'if ((!showHidden && child.name.startsWith(".")) || path.contains("/Android/data/")'
+          new_scan_filter = 'if (isPendingTemporaryName(child.name) || (!showHidden && child.name.startsWith(".")) || path.contains("/Android/data/")'
+          if new_scan_filter not in code:
+              if old_scan_filter not in code:
+                  raise SystemExit("Could not locate recursive scan filter for pending filenames")
+              code = code.replace(old_scan_filter, new_scan_filter, 1)
+
+          if not all(part in code for part in (
+              "import androidx.compose.foundation.border",
+              "private fun isPendingTemporaryName(name: String)",
+              "!isPendingTemporaryName(it.name)",
+              "if (isPendingTemporaryName(child.name)",
+          )):
+              raise SystemExit("Source verification failed after patching")
+          source.write_text(code)
+          print("Patched and verified Compose border import and .pending-* filename filtering.")
+          PY
 
       - name: Build debug APK
         shell: bash
