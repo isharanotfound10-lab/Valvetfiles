@@ -159,25 +159,27 @@ jobs:
               ss = s.index("private fun SettingsScreen(")
               se = s.index("@Composable\nprivate fun CategoryCard(", ss)
               settings = s[ss:se].replace("        GlassPanel {", "        GlassPanel(animate = motionEnabled) {")
-              needle = '''            HorizontalDivider(color = Border)
-              Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)) {
-                  Box(Modifier.size(40.dp).clip(RoundedCornerShape(13.dp)).background(Glass), contentAlignment = Alignment.Center) { Icon(Icons.Default.Visibility, null, tint = Cyan) }'''
-              repl = '''            HorizontalDivider(color = Border)
-                          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)) {
-                              Box(Modifier.size(40.dp).clip(RoundedCornerShape(13.dp)).background(Glass), contentAlignment = Alignment.Center) { Icon(Icons.Default.AutoAwesome, null, tint = Purple) }
-                              Spacer(Modifier.width(12.dp))
-                              Column(Modifier.weight(1f)) {
-                                  Text("Liquid motion", color = Color.White, fontWeight = FontWeight.SemiBold)
-                                  Text("Moving light, ambient glow and springy touch feedback", color = Muted, style = MaterialTheme.typography.bodySmall)
-                              }
-                              Switch(checked = motionEnabled, onCheckedChange = onMotionEffects, colors = SwitchDefaults.colors(checkedThumbColor = Ink, checkedTrackColor = Purple))
-                          }
-                          HorizontalDivider(color = Border)
-                          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)) {
-                              Box(Modifier.size(40.dp).clip(RoundedCornerShape(13.dp)).background(Glass), contentAlignment = Alignment.Center) { Icon(Icons.Default.Visibility, null, tint = Cyan) }'''
-              if needle not in settings:
-                  raise SystemExit("Could not find settings location for Liquid motion")
-              settings = settings.replace(needle, repl, 1)
+              target = 'Text("Show hidden files", color = Color.White, fontWeight = FontWeight.SemiBold)'
+              if 'Text("Liquid motion"' not in settings:
+                  pos = settings.index(target)
+                  row_marker = '            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)) {'
+                  row_start = settings.rfind(row_marker, 0, pos)
+                  if row_start < 0:
+                      raise SystemExit("Could not locate hidden-files settings row")
+                  motion_lines = [
+                      '            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)) {',
+                      '                Box(Modifier.size(40.dp).clip(RoundedCornerShape(13.dp)).background(Glass), contentAlignment = Alignment.Center) { Icon(Icons.Default.AutoAwesome, null, tint = Purple) }',
+                      '                Spacer(Modifier.width(12.dp))',
+                      '                Column(Modifier.weight(1f)) {',
+                      '                    Text("Liquid motion", color = Color.White, fontWeight = FontWeight.SemiBold)',
+                      '                    Text("Moving light, ambient glow and springy touch feedback", color = Muted, style = MaterialTheme.typography.bodySmall)',
+                      '                }',
+                      '                Switch(checked = motionEnabled, onCheckedChange = onMotionEffects, colors = SwitchDefaults.colors(checkedThumbColor = Ink, checkedTrackColor = Purple))',
+                      '            }',
+                      '            HorizontalDivider(color = Border)',
+                  ]
+                  motion = "\\n".join(motion_lines) + "\\n"
+                  settings = settings[:row_start] + motion + settings[row_start:]
               s = s[:ss] + settings + s[se:]
 
               cs = s.index("@Composable\nprivate fun CategoryCard(")
