@@ -386,6 +386,7 @@ jobs:
           base64 -d .github/scripts/v15_patch.txt | gzip -dc > /tmp/v15_patch.py
           python3 -m py_compile /tmp/v15_patch.py
           python3 /tmp/v15_patch.py
+          sed -i 's|^import androidx.compose.foundation.transformable$|import androidx.compose.foundation.gestures.transformable|' native-project/app/src/main/java/com/velvetfiles/app/MainActivity.kt
           grep -F 'versionName = "1.5"' native-project/app/build.gradle.kts
 
       - name: Export patched Kotlin source for validation
