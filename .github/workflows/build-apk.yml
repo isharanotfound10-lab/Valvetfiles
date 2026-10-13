@@ -430,9 +430,7 @@ jobs:
                          indent + '    // Horizontal swipes do not seek; use the timeline slider.\\n' +
                          indent + '} else if (startX > size.width * .58f) {\\n' +
                          indent + '    change.consume()')
-          s = s[:consume_line_start] + replacement + s[end:]
           replacement = replacement.replace(chr(92) + "n", chr(10))
-          # Rebuild from the original source offsets using real line breaks.
           s = s[:consume_line_start] + replacement + s[end:]
           p.write_text(s)
           print("Applied audio-position preservation and non-seeking horizontal gesture fix")
