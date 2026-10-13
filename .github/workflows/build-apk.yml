@@ -160,8 +160,8 @@ jobs:
               se = s.index("@Composable\nprivate fun CategoryCard(", ss)
               settings = s[ss:se].replace("        GlassPanel {", "        GlassPanel(animate = motionEnabled) {")
               needle = '''            HorizontalDivider(color = Border)
-                          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)) {
-                              Box(Modifier.size(40.dp).clip(RoundedCornerShape(13.dp)).background(Glass), contentAlignment = Alignment.Center) { Icon(Icons.Default.Visibility, null, tint = Cyan) }'''
+              Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)) {
+                  Box(Modifier.size(40.dp).clip(RoundedCornerShape(13.dp)).background(Glass), contentAlignment = Alignment.Center) { Icon(Icons.Default.Visibility, null, tint = Cyan) }'''
               repl = '''            HorizontalDivider(color = Border)
                           Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)) {
                               Box(Modifier.size(40.dp).clip(RoundedCornerShape(13.dp)).background(Glass), contentAlignment = Alignment.Center) { Icon(Icons.Default.AutoAwesome, null, tint = Purple) }
