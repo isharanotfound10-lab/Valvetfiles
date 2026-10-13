@@ -414,24 +414,30 @@ jobs:
           if old not in s:
               raise SystemExit("Could not find audio-track menu handler; refusing to apply partial fix")
           s = s.replace(old, new, 1)
-          # Match the gesture block by syntax rather than brittle indentation.
-          pattern = re.compile(r'(?P<indent>\\s*)change\\.consume\\(\\)\\s*if \\(abs\\(drag\\.x\\) > abs\\(drag\\.y\\)\\) \\{.*?\\} else if \\(startX > size\\.width \\* \\.58f\\) \\{', re.S)
-          match = pattern.search(s)
-          if not match:
-              raise SystemExit("Could not locate horizontal seek branch inside video gesture handler")
-          indent = match.group("indent")
-          replacement = (
-              indent + 'if (abs(drag.x) > abs(drag.y) * 1.25f) {\\n' +
-              indent + '    // Horizontal swipes do not seek; use the timeline slider.\\n' +
-              indent + '} else if (startX > size.width * .58f) {\\n' +
-              indent + '    change.consume()'
-          )
-          s = s[:match.start()] + replacement + s[match.end():]
-          # Consume vertical brightness gestures only.
-          pattern = re.compile(r'(else \\{\\s*)(val maxBright)')
-          if not pattern.search(s):
+          # Locate the actual drag branch by tokens, ignoring whitespace differences.
+          seek = s.find("if (abs(drag.x) > abs(drag.y)) {")
+          if seek < 0:
+              raise SystemExit("Could not locate horizontal seek branch")
+          line_start = s.rfind("\\n", 0, seek) + 1
+          consume = s.rfind("change.consume()", 0, seek)
+          consume_line_start = s.rfind("\\n", 0, consume) + 1
+          branch_end = s.find("} else if (startX > size.width * .58f) {", seek)
+          if consume < 0 or branch_end < 0 or consume_line_start < line_start - 300:
+              raise SystemExit("Could not locate expected drag gesture boundaries")
+          indent = s[consume_line_start:len(s[consume_line_start:]) - len(s[consume_line_start:].lstrip())]
+          end = branch_end + len("} else if (startX > size.width * .58f) {")
+          replacement = (indent + 'if (abs(drag.x) > abs(drag.y) * 1.25f) {\\n' +
+                         indent + '    // Horizontal swipes do not seek; use the timeline slider.\\n' +
+                         indent + '} else if (startX > size.width * .58f) {\\n' +
+                         indent + '    change.consume()')
+          s = s[:consume_line_start] + replacement + s[end:]
+          # Ensure brightness gestures are consumed, but do not consume horizontal swipes.
+          bright = s.find("val maxBright")
+          if bright < 0:
               raise SystemExit("Could not locate brightness gesture branch")
-          s = pattern.sub(r'\\1change.consume()\\n                        \\2', s, count=1)
+          bright_line = s.rfind("\\n", 0, bright) + 1
+          if "change.consume()" not in s[max(0, bright_line-100):bright_line]:
+              s = s[:bright_line] + s[bright_line:bright] + "change.consume()\\n" + s[bright:]
           p.write_text(s)
           print("Applied audio-position preservation and non-seeking horizontal gesture fix")
           PY
