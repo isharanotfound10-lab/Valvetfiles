@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - "Velvet_Files_Native_Android_Project.zip"
+      - "Velvet_Files_Native_Android_Project (3).zip"
       - "**/*.zip"
       - ".github/workflows/build-apk.yml"
 
@@ -48,13 +49,15 @@ jobs:
         run: |
           ZIP_FILE="./Velvet_Files_Native_Android_Project.zip"
           if [ ! -f "$ZIP_FILE" ]; then
-            ZIP_FILE="$(find . -type f -iname '*Velvet*Native*Android*Project*.zip' -not -path './native-project/*' -print | sort | tail -n 1)"
+            ZIP_FILE="./Velvet_Files_Native_Android_Project (3).zip"
           fi
-          if [ -z "$ZIP_FILE" ] || [ ! -f "$ZIP_FILE" ]; then
-            echo "::error::Upload Velvet_Files_Native_Android_Project.zip to the repository root."
+          if [ ! -f "$ZIP_FILE" ]; then
+            echo "::error::Expected Velvet_Files_Native_Android_Project.zip (or the existing (3) backup) in the repository root."
+            find . -maxdepth 2 -type f -iname '*.zip' -print
             exit 1
           fi
           echo "Using project ZIP: $ZIP_FILE"
+          rm -rf native-project
           mkdir -p native-project
           unzip -o "$ZIP_FILE" -d native-project
           if [ ! -f native-project/app/build.gradle.kts ]; then
@@ -62,6 +65,19 @@ jobs:
             find native-project -maxdepth 5 -type f | sort | head -100
             exit 1
           fi
+
+      - name: Patch missing Compose border import if needed
+        shell: bash
+        run: |
+          SOURCE_FILE="native-project/app/src/main/java/com/velvetfiles/app/MainActivity.kt"
+          if [ ! -f "$SOURCE_FILE" ]; then
+            echo "::error::MainActivity.kt was not found after extraction."
+            exit 1
+          fi
+          if ! grep -q '^import androidx.compose.foundation.border$' "$SOURCE_FILE"; then
+            sed -i '/^import androidx.compose.foundation.background$/a import androidx.compose.foundation.border' "$SOURCE_FILE"
+          fi
+          grep -n '^import androidx.compose.foundation.border$' "$SOURCE_FILE"
 
       - name: Build debug APK
         shell: bash
