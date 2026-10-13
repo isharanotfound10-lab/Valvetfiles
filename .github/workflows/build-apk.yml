@@ -283,6 +283,15 @@ jobs:
           print(f"Installed and verified liquid-glass UI with {themes} themes, motion toggle and spring interactions.")
           PY
 
+      - name: Export patched Kotlin source for validation
+        uses: actions/upload-artifact@v4
+        with:
+          name: Velvet-Files-Source-Diagnostic
+          path: |
+            native-project/app/src/main/java/com/velvetfiles/app/MainActivity.kt
+            native-project/app/build.gradle.kts
+          retention-days: 1
+
       - name: Build debug APK
         shell: bash
         run: gradle -p native-project assembleDebug --stacktrace
