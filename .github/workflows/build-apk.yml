@@ -178,7 +178,7 @@ jobs:
                       '            }',
                       '            HorizontalDivider(color = Border)',
                   ]
-                  motion = "\\n".join(motion_lines) + "\\n"
+                  motion = "\n".join(motion_lines) + "\n"
                   settings = settings[:row_start] + motion + settings[row_start:]
               s = s[:ss] + settings + s[se:]
 
