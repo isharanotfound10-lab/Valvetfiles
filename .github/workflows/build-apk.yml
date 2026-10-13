@@ -389,6 +389,23 @@ jobs:
           sed -i 's|^import androidx.compose.foundation.transformable$|import androidx.compose.foundation.gestures.transformable|' native-project/app/src/main/java/com/velvetfiles/app/MainActivity.kt
           grep -F 'versionName = "1.5"' native-project/app/build.gradle.kts
 
+      - name: Inspect media track and gesture handlers
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("native-project/app/src/main/java/com/velvetfiles/app/MainActivity.kt")
+          lines = p.read_text().splitlines()
+          terms = ("seekTo(", "onAudio", "audioTrack", "TrackSelection", "setMediaItem", "setAudioAttributes", "detectDragGestures", "detectVerticalDragGestures", "pointerInput", "Slider(", "currentPosition", "currentPositionMs", "selectedAudio", "audioTracks", "TrackGroup")
+          found = set()
+          for i, line in enumerate(lines):
+              if any(t.lower() in line.lower() for t in terms):
+                  for j in range(max(0, i-3), min(len(lines), i+5)):
+                      found.add(j)
+          for i in sorted(found):
+              print(f"{i+1}: {lines[i]}")
+          PY
+
       - name: Export patched Kotlin source for validation
         uses: actions/upload-artifact@v4
         with:
