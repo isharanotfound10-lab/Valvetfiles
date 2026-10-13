@@ -418,9 +418,9 @@ jobs:
           seek = s.find("if (abs(drag.x) > abs(drag.y)) {")
           if seek < 0:
               raise SystemExit("Could not locate horizontal seek branch")
-          line_start = s.rfind("\\n", 0, seek) + 1
+          line_start = s.rfind(chr(10), 0, seek) + 1
           consume = s.rfind("change.consume()", 0, seek)
-          consume_line_start = s.rfind("\\n", 0, consume) + 1
+          consume_line_start = s.rfind(chr(10), 0, consume) + 1
           branch_end = s.find("} else if (startX > size.width * .58f) {", seek)
           if consume < 0 or branch_end < 0 or consume_line_start < line_start - 300:
               raise SystemExit("Could not locate expected drag gesture boundaries")
@@ -430,6 +430,9 @@ jobs:
                          indent + '    // Horizontal swipes do not seek; use the timeline slider.\\n' +
                          indent + '} else if (startX > size.width * .58f) {\\n' +
                          indent + '    change.consume()')
+          s = s[:consume_line_start] + replacement + s[end:]
+          replacement = replacement.replace(chr(92) + "n", chr(10))
+          # Rebuild from the original source offsets using real line breaks.
           s = s[:consume_line_start] + replacement + s[end:]
           p.write_text(s)
           print("Applied audio-position preservation and non-seeking horizontal gesture fix")
