@@ -389,6 +389,58 @@ jobs:
           sed -i 's|^import androidx.compose.foundation.transformable$|import androidx.compose.foundation.gestures.transformable|' native-project/app/src/main/java/com/velvetfiles/app/MainActivity.kt
           grep -F 'versionName = "1.5"' native-project/app/build.gradle.kts
 
+      - name: Fix audio track position and video gesture handling
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("native-project/app/src/main/java/com/velvetfiles/app/MainActivity.kt")
+          s = p.read_text()
+          old = 'audioTracks.forEach { track -> DropdownMenuItem(text = { Text(track.second, color = Color.White) }, onClick = { try { mediaPlayer?.selectTrack(track.first) } catch (_: Exception) {}; trackMenu = "" }) }'
+          new = '''audioTracks.forEach { track -> DropdownMenuItem(text = { Text(track.second, color = Color.White) }, onClick = {
+                                  val savedPosition = try { videoView?.currentPosition ?: mediaPlayer?.currentPosition ?: position } catch (_: Exception) { position }
+                                  val wasPlaying = try { videoView?.isPlaying ?: playing } catch (_: Exception) { playing }
+                                  try { mediaPlayer?.selectTrack(track.first) } catch (_: Exception) {}
+                                  trackMenu = ""
+                                  android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                                      try {
+                                          videoView?.seekTo(savedPosition.coerceAtLeast(0))
+                                          position = savedPosition.coerceAtLeast(0)
+                                          if (wasPlaying) videoView?.start()
+                                      } catch (_: Exception) {}
+                                  }, 120)
+                              }) }'''
+          if old not in s:
+              raise SystemExit("Could not find audio-track menu handler; refusing to apply partial fix")
+          s = s.replace(old, new, 1)
+          old = '''                    change.consume()
+                    if (abs(drag.x) > abs(drag.y)) {
+                        val view = videoView
+                        if (ready && view != null) {
+                            val target = (view.currentPosition + (drag.x * 75).roundToInt()).coerceIn(0, duration.coerceAtLeast(1))
+                            view.seekTo(target); position = target
+                        }
+                    } else if (startX > size.width * .58f) {'''
+          new = '''                    if (abs(drag.x) > abs(drag.y) * 1.25f) {
+                        // Horizontal swipes do not capture the whole video surface.
+                        // Seeking is handled by the explicit timeline slider only.
+                    } else if (startX > size.width * .58f) {
+                        change.consume()'''
+          if old not in s:
+              raise SystemExit("Could not find expected video drag handler; refusing to apply partial fix")
+          s = s.replace(old, new, 1)
+          old = '''                    } else {
+                        val maxBright'''
+          new = '''                    } else {
+                        change.consume()
+                        val maxBright'''
+          if old not in s:
+              raise SystemExit("Could not find brightness gesture branch; refusing to apply partial fix")
+          s = s.replace(old, new, 1)
+          p.write_text(s)
+          print("Applied audio-position preservation and non-seeking horizontal gesture fix")
+          PY
+
       - name: Inspect media track and gesture handlers
         shell: bash
         run: |
