@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "Velvet_Files_Native_Android_Project.zip"
+      - "**/*.zip"
       - ".github/workflows/build-apk.yml"
 
 permissions:
@@ -28,32 +28,44 @@ jobs:
       - name: Find Android SDK manager
         shell: bash
         run: |
-          echo "ANDROID_HOME=${ANDROID_HOME:-$ANDROID_SDK_ROOT}" >> "$GITHUB_ENV"
           SDK_ROOT="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
           SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -name sdkmanager -type f | head -n 1)"
           if [ -z "$SDKMANAGER" ]; then
-            echo "Could not find sdkmanager"
+            echo "Could not find sdkmanager under $SDK_ROOT"
             exit 1
           fi
           echo "SDKMANAGER=$SDKMANAGER" >> "$GITHUB_ENV"
 
       - name: Install Android SDK packages
+        shell: bash
         run: |
-          yes | "$SDKMANAGER" --licenses
+          yes | "$SDKMANAGER" --licenses || true
           "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.10.2"
-
-      - name: Extract project
+      - name: Locate and extract project ZIP
+        shell: bash
         run: |
+          echo "Files in repository:"
+          find . -maxdepth 4 -type f | sort | head -200
+          ZIP_FILE="$(find . -type f -iname '*Velvet*Native*Android*Project*.zip' -print -quit)"
+          if [ -z "$ZIP_FILE" ]; then
+            echo "::error::Cannot find the Velvet Files native project ZIP. Upload Velvet_Files_Native_Android_Project.zip to the repository."
+            exit 1
+          fi
+          echo "Using project ZIP: $ZIP_FILE"
           mkdir -p native-project
-          unzip -o Velvet_Files_Native_Android_Project.zip -d native-project
+          unzip -o "$ZIP_FILE" -d native-project
+          echo "Extracted project files:"
+          find native-project -maxdepth 3 -type f | sort | head -100
 
       - name: Build APK
-        run: gradle -p native-project assembleDebug
+        shell: bash
+        run: |
+          if [ ! -f native-project/app/build.gradle.kts ]; then
+            echo "::error::The ZIP did not extract to the expected project structure (app/build.gradle.kts missing)."
+            exit 1
+          fi
+          gradle -p native-project assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -62,3 +74,4 @@ jobs:
           path: native-project/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 7
+
