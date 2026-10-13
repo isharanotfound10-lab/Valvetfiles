@@ -72,10 +72,10 @@ jobs:
           p = Path("native-project/app/src/main/java/com/velvetfiles/app/MainActivity.kt")
           s = p.read_text()
           if "import androidx.compose.foundation.border" not in s:
-              s = s.replace("import androidx.compose.foundation.background", "import androidx.compose.foundation.background\\nimport androidx.compose.foundation.border", 1)
+              s = s.replace("import androidx.compose.foundation.background", "import androidx.compose.foundation.background\nimport androidx.compose.foundation.border", 1)
           if "private fun isPendingTemporaryName(name: String)" not in s:
               marker = "private fun listDirectory(folder: File, showHidden: Boolean = false): List<FileEntry> = try {"
-              s = s.replace(marker, 'private fun isPendingTemporaryName(name: String): Boolean = name.startsWith(".pending-", ignoreCase = true)\\n\\n' + marker, 1)
+              s = s.replace(marker, 'private fun isPendingTemporaryName(name: String): Boolean = name.startsWith(".pending-", ignoreCase = true)\n\n' + marker, 1)
           old = 'folder.listFiles()?.filter { it.canRead() && (showHidden || !it.name.startsWith(".")) }'
           new = 'folder.listFiles()?.filter { it.canRead() && !isPendingTemporaryName(it.name) && (showHidden || !it.name.startsWith(".")) }'
           s = s.replace(old, new)
@@ -115,10 +115,10 @@ jobs:
               marker = "import androidx.compose.animation.animateContentSize"
               for item in imports:
                   if item not in s:
-                      s = s.replace(marker, marker + "\\n" + item, 1)
+                      s = s.replace(marker, marker + "\n" + item, 1)
 
               start = s.index("private val ThemePresets = listOf(")
-              end = s.index("\\nprivate val ActiveTheme", start)
+              end = s.index("\nprivate val ActiveTheme", start)
               themes = '''private val ThemePresets = listOf(
               ThemePreset("Liquid Glass", Color(0xFF05040A), Color(0xFF111019), Color(0xFF191522), Color(0xB8211A30), Color(0xFFBD7BFF), Color(0xFF70E5FF), Color(0xFFB7ADC8), Color(0x554D3B67)),
               ThemePreset("Arctic Aurora", Color(0xFF061019), Color(0xFF0D1C28), Color(0xFF142B3A), Color(0xB8173848), Color(0xFF65E7FF), Color(0xFF9EAFFF), Color(0xFFAFC7D7), Color(0x554D8AA0)),
@@ -133,7 +133,7 @@ jobs:
               )'''
               s = s[:start] + themes + s[end:]
 
-              s = s.replace('    var compact by remember { mutableStateOf(prefs.getBoolean("compact_rows", false)) }', '    var compact by remember { mutableStateOf(prefs.getBoolean("compact_rows", false)) }\\n    var motionEnabled by remember { mutableStateOf(prefs.getBoolean("motion_effects", true))', 1)
+              s = s.replace('    var compact by remember { mutableStateOf(prefs.getBoolean("compact_rows", false)) }', '    var compact by remember { mutableStateOf(prefs.getBoolean("compact_rows", false)) }\n    var motionEnabled by remember { mutableStateOf(prefs.getBoolean("motion_effects", true))', 1)
               s = s.replace('''    fun setCompactRows(value: Boolean) {
                   compact = value
                   prefs.edit().putBoolean("compact_rows", value).apply()
@@ -145,19 +145,19 @@ jobs:
                   motionEnabled = value
                   prefs.edit().putBoolean("motion_effects", value).apply()
               }''', 1)
-              s = s.replace('                    compact = compact,\\n                    onSettings', '                    compact = compact,\\n                    motionEnabled = motionEnabled,\\n                    onSettings', 1)
-              s = s.replace('                    gridLayout = grid,\\n                    onGridLayout = { setGridLayout(it) },\\n                    onBack', '                    gridLayout = grid,\\n                    onGridLayout = { setGridLayout(it) },\\n                    motionEnabled = motionEnabled,\\n                    onMotionEffects = { setMotionEffects(it) },\\n                    onBack', 1)
+              s = s.replace('                    compact = compact,\n                    onSettings', '                    compact = compact,\n                    motionEnabled = motionEnabled,\n                    onSettings', 1)
+              s = s.replace('                    gridLayout = grid,\n                    onGridLayout = { setGridLayout(it) },\n                    onBack', '                    gridLayout = grid,\n                    onGridLayout = { setGridLayout(it) },\n                    motionEnabled = motionEnabled,\n                    onMotionEffects = { setMotionEffects(it) },\n                    onBack', 1)
               s = s.replace('Column(Modifier.fillMaxSize().background(Ink).padding(scaffoldPadding).padding(horizontal = 16.dp)) {', 'Column(Modifier.fillMaxSize().liquidBackdrop(animate = motionEnabled).padding(scaffoldPadding).padding(horizontal = 16.dp)) {', 1)
               s = s.replace('    recents: List<FileEntry>, compact: Boolean, onSettings: () -> Unit, onBrowse: () -> Unit,', '    recents: List<FileEntry>, compact: Boolean, motionEnabled: Boolean, onSettings: () -> Unit, onBrowse: () -> Unit,', 1)
               s = s.replace('Column(modifier.fillMaxSize().background(Brush.verticalGradient(listOf(PanelLight.copy(alpha = .82f), Ink, Ink))).verticalScroll(scroll).padding(horizontal = 18.dp)) {', 'Column(modifier.fillMaxSize().liquidBackdrop(animate = motionEnabled).verticalScroll(scroll).padding(horizontal = 18.dp)) {', 1)
               s = s.replace('Modifier.weight(1f)) { onCategory(', 'Modifier.weight(1f), animate = motionEnabled) { onCategory(')
               hs = s.index("private fun HomeScreen(")
-              he = s.index("@Composable\\nprivate fun SettingsScreen(", hs)
+              he = s.index("@Composable\nprivate fun SettingsScreen(", hs)
               s = s[:hs] + s[hs:he].replace("        GlassPanel {", "        GlassPanel(animate = motionEnabled) {") + s[he:]
-              s = s.replace('    gridLayout: Boolean,\\n    onGridLayout: (Boolean) -> Unit,\\n    onBack: () -> Unit,', '    gridLayout: Boolean,\\n    onGridLayout: (Boolean) -> Unit,\\n    motionEnabled: Boolean,\\n    onMotionEffects: (Boolean) -> Unit,\\n    onBack: () -> Unit,', 1)
-              s = s.replace('.background(Brush.verticalGradient(listOf(PanelLight.copy(alpha = .95f), Ink, Ink)))\\n            .verticalScroll', '.liquidBackdrop(animate = motionEnabled)\\n            .verticalScroll', 1)
+              s = s.replace('    gridLayout: Boolean,\n    onGridLayout: (Boolean) -> Unit,\n    onBack: () -> Unit,', '    gridLayout: Boolean,\n    onGridLayout: (Boolean) -> Unit,\n    motionEnabled: Boolean,\n    onMotionEffects: (Boolean) -> Unit,\n    onBack: () -> Unit,', 1)
+              s = s.replace('.background(Brush.verticalGradient(listOf(PanelLight.copy(alpha = .95f), Ink, Ink)))\n            .verticalScroll', '.liquidBackdrop(animate = motionEnabled)\n            .verticalScroll', 1)
               ss = s.index("private fun SettingsScreen(")
-              se = s.index("@Composable\\nprivate fun CategoryCard(", ss)
+              se = s.index("@Composable\nprivate fun CategoryCard(", ss)
               settings = s[ss:se].replace("        GlassPanel {", "        GlassPanel(animate = motionEnabled) {")
               needle = '''            HorizontalDivider(color = Border)
                           Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)) {
@@ -180,8 +180,8 @@ jobs:
               settings = settings.replace(needle, repl, 1)
               s = s[:ss] + settings + s[se:]
 
-              cs = s.index("@Composable\\nprivate fun CategoryCard(")
-              ce = s.index("@Composable\\nprivate fun GlassSearchField(", cs)
+              cs = s.index("@Composable\nprivate fun CategoryCard(")
+              ce = s.index("@Composable\nprivate fun GlassSearchField(", cs)
               components = '''@Composable
               private fun CategoryCard(
                   title: String, subtitle: String, icon: androidx.compose.ui.graphics.vector.ImageVector,
