@@ -387,9 +387,20 @@ jobs:
             native-project/app/build.gradle.kts
           retention-days: 1
 
-      - name: Build debug APK
+      - name: Build APK and run Android unit tests
         shell: bash
-        run: gradle -p native-project assembleDebug --stacktrace
+        run: gradle -p native-project assembleDebug testDebugUnitTest --stacktrace
+
+      - name: Verify v1.4 APK package
+        shell: bash
+        run: |
+          APK="$(find native-project/app/build/outputs/apk/debug -maxdepth 1 -type f -name '*.apk' | head -n 1)"
+          if [ -z "$APK" ]; then echo "::error::No debug APK found"; exit 1; fi
+          unzip -t "$APK"
+          AAPT="$ANDROID_HOME/build-tools/35.0.0/aapt"
+          "$AAPT" dump badging "$APK" | tee /tmp/velvet-badging.txt
+          grep -q "versionCode='5' versionName='1.4'" /tmp/velvet-badging.txt
+          echo "Verified package versionCode 5 / versionName 1.4."
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
