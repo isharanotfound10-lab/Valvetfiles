@@ -394,6 +394,7 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
           p = Path("native-project/app/src/main/java/com/velvetfiles/app/MainActivity.kt")
           s = p.read_text()
           old = 'audioTracks.forEach { track -> DropdownMenuItem(text = { Text(track.second, color = Color.White) }, onClick = { try { mediaPlayer?.selectTrack(track.first) } catch (_: Exception) {}; trackMenu = "" }) }'
@@ -413,30 +414,24 @@ jobs:
           if old not in s:
               raise SystemExit("Could not find audio-track menu handler; refusing to apply partial fix")
           s = s.replace(old, new, 1)
-          old = '''                    change.consume()
-                    if (abs(drag.x) > abs(drag.y)) {
-                        val view = videoView
-                        if (ready && view != null) {
-                            val target = (view.currentPosition + (drag.x * 75).roundToInt()).coerceIn(0, duration.coerceAtLeast(1))
-                            view.seekTo(target); position = target
-                        }
-                    } else if (startX > size.width * .58f) {'''
-          new = '''                    if (abs(drag.x) > abs(drag.y) * 1.25f) {
-                        // Horizontal swipes do not capture the whole video surface.
-                        // Seeking is handled by the explicit timeline slider only.
-                    } else if (startX > size.width * .58f) {
-                        change.consume()'''
-          if old not in s:
-              raise SystemExit("Could not find expected video drag handler; refusing to apply partial fix")
-          s = s.replace(old, new, 1)
-          old = '''                    } else {
-                        val maxBright'''
-          new = '''                    } else {
-                        change.consume()
-                        val maxBright'''
-          if old not in s:
-              raise SystemExit("Could not find brightness gesture branch; refusing to apply partial fix")
-          s = s.replace(old, new, 1)
+          # Match the gesture block by syntax rather than brittle indentation.
+          pattern = re.compile(r'(?P<indent>\\s*)change\\.consume\\(\\)\\s*if \\(abs\\(drag\\.x\\) > abs\\(drag\\.y\\)\\) \\{.*?\\} else if \\(startX > size\\.width \\* \\.58f\\) \\{', re.S)
+          match = pattern.search(s)
+          if not match:
+              raise SystemExit("Could not locate horizontal seek branch inside video gesture handler")
+          indent = match.group("indent")
+          replacement = (
+              indent + 'if (abs(drag.x) > abs(drag.y) * 1.25f) {\\n' +
+              indent + '    // Horizontal swipes do not seek; use the timeline slider.\\n' +
+              indent + '} else if (startX > size.width * .58f) {\\n' +
+              indent + '    change.consume()'
+          )
+          s = s[:match.start()] + replacement + s[match.end():]
+          # Consume vertical brightness gestures only.
+          pattern = re.compile(r'(else \\{\\s*)(val maxBright)')
+          if not pattern.search(s):
+              raise SystemExit("Could not locate brightness gesture branch")
+          s = pattern.sub(r'\\1change.consume()\\n                        \\2', s, count=1)
           p.write_text(s)
           print("Applied audio-position preservation and non-seeking horizontal gesture fix")
           PY
