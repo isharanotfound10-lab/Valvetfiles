@@ -7,6 +7,7 @@ on:
       - "Velvet_Files_Native_Android_Project.zip"
       - "Velvet_Files_Native_Android_Project (3).zip"
       - "**/*.zip"
+      - ".github/scripts/v14_patch_part*.txt"
       - ".github/workflows/build-apk.yml"
 
 permissions:
@@ -365,6 +366,17 @@ jobs:
           p.write_text(s)
           print("Preserved animated glass highlights and enabled confirmation before bulk deletion.")
           PY
+
+      - name: Apply v1.4 media-player and preview features
+        shell: bash
+        run: |
+          cat .github/scripts/v14_patch_part{1..6}.txt > /tmp/v14-media-patch.b64
+          echo "d21ef9ebf33c2bbf90bf1dd51223509961626fba5233dba3219b0ecd6bbd24f1  /tmp/v14-media-patch.b64" | sha256sum -c -
+          base64 -d /tmp/v14-media-patch.b64 | gzip -dc > /tmp/v14_media_patch.py
+          python3 -m py_compile /tmp/v14_media_patch.py
+          python3 /tmp/v14_media_patch.py
+          grep -F 'versionName = "1.4"' native-project/app/build.gradle.kts
+          test -f native-project/app/src/main/java/com/velvetfiles/app/VelvetAudioService.kt
 
       - name: Export patched Kotlin source for validation
         uses: actions/upload-artifact@v4
