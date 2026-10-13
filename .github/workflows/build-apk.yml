@@ -431,13 +431,6 @@ jobs:
                          indent + '} else if (startX > size.width * .58f) {\\n' +
                          indent + '    change.consume()')
           s = s[:consume_line_start] + replacement + s[end:]
-          # Ensure brightness gestures are consumed, but do not consume horizontal swipes.
-          bright = s.find("val maxBright")
-          if bright < 0:
-              raise SystemExit("Could not locate brightness gesture branch")
-          bright_line = s.rfind("\\n", 0, bright) + 1
-          if "change.consume()" not in s[max(0, bright_line-100):bright_line]:
-              s = s[:bright_line] + s[bright_line:bright] + "change.consume()\\n" + s[bright:]
           p.write_text(s)
           print("Applied audio-position preservation and non-seeking horizontal gesture fix")
           PY
