@@ -48,9 +48,7 @@ jobs:
         shell: bash
         run: |
           ZIP_FILE="./Velvet_Files_Native_Android_Project.zip"
-          if [ ! -f "$ZIP_FILE" ]; then
-            ZIP_FILE="./Velvet_Files_Native_Android_Project (3).zip"
-          fi
+          if [ ! -f "$ZIP_FILE" ]; then ZIP_FILE="./Velvet_Files_Native_Android_Project (3).zip"; fi
           if [ ! -f "$ZIP_FILE" ]; then
             echo "::error::Expected Velvet_Files_Native_Android_Project.zip (or the existing (3) backup) in the repository root."
             find . -maxdepth 2 -type f -iname '*.zip' -print
@@ -66,61 +64,220 @@ jobs:
             exit 1
           fi
 
-      - name: Patch Compose import and hide pending media files
+      - name: Patch pending files and Compose import
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-
-          source = Path("native-project/app/src/main/java/com/velvetfiles/app/MainActivity.kt")
-          if not source.is_file():
-              raise SystemExit("MainActivity.kt was not found after extracting project ZIP")
-          code = source.read_text()
-
-          # Fix the known missing Compose border import in older source ZIPs.
-          if "import androidx.compose.foundation.border" not in code:
-              code = code.replace(
-                  "import androidx.compose.foundation.background",
-                  "import androidx.compose.foundation.background\nimport androidx.compose.foundation.border",
-                  1,
-              )
-
-          # Android can leave unpublished files named .pending-* on shared storage.
-          # Hide them in folder listings and recursive category/recent/search scans;
-          # never rename or delete the underlying files.
-          if "private fun isPendingTemporaryName(name: String)" not in code:
+          p = Path("native-project/app/src/main/java/com/velvetfiles/app/MainActivity.kt")
+          s = p.read_text()
+          if "import androidx.compose.foundation.border" not in s:
+              s = s.replace("import androidx.compose.foundation.background", "import androidx.compose.foundation.background\\nimport androidx.compose.foundation.border", 1)
+          if "private fun isPendingTemporaryName(name: String)" not in s:
               marker = "private fun listDirectory(folder: File, showHidden: Boolean = false): List<FileEntry> = try {"
-              if marker not in code:
-                  raise SystemExit("Could not locate listDirectory() to patch pending filenames")
-              code = code.replace(
-                  marker,
-                  'private fun isPendingTemporaryName(name: String): Boolean = name.startsWith(".pending-", ignoreCase = true)\n\n' + marker,
-                  1,
-              )
+              s = s.replace(marker, 'private fun isPendingTemporaryName(name: String): Boolean = name.startsWith(".pending-", ignoreCase = true)\\n\\n' + marker, 1)
+          old = 'folder.listFiles()?.filter { it.canRead() && (showHidden || !it.name.startsWith(".")) }'
+          new = 'folder.listFiles()?.filter { it.canRead() && !isPendingTemporaryName(it.name) && (showHidden || !it.name.startsWith(".")) }'
+          s = s.replace(old, new)
+          old = 'if ((!showHidden && child.name.startsWith(".")) || path.contains("/Android/data/")'
+          new = 'if (isPendingTemporaryName(child.name) || (!showHidden && child.name.startsWith(".")) || path.contains("/Android/data/")'
+          s = s.replace(old, new)
+          p.write_text(s)
+          print("Verified temporary .pending-* filter and Compose border import.")
+          PY
 
-          old_directory_filter = 'folder.listFiles()?.filter { it.canRead() && (showHidden || !it.name.startsWith(".")) }'
-          new_directory_filter = 'folder.listFiles()?.filter { it.canRead() && !isPendingTemporaryName(it.name) && (showHidden || !it.name.startsWith(".")) }'
-          if new_directory_filter not in code:
-              if old_directory_filter not in code:
-                  raise SystemExit("Could not locate folder listing filter for pending filenames")
-              code = code.replace(old_directory_filter, new_directory_filter, 1)
+      - name: Install liquid-glass materials, motion and 10 themes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          source = Path("native-project/app/src/main/java/com/velvetfiles/app/MainActivity.kt")
+          s = source.read_text()
+          if "private fun Modifier.liquidGlassSurface" not in s:
+              imports = [
+                  "import androidx.compose.animation.core.LinearEasing",
+                  "import androidx.compose.animation.core.RepeatMode",
+                  "import androidx.compose.animation.core.animateFloatAsState",
+                  "import androidx.compose.animation.core.infiniteRepeatable",
+                  "import androidx.compose.animation.core.rememberInfiniteTransition",
+                  "import androidx.compose.animation.core.spring",
+                  "import androidx.compose.animation.core.tween",
+                  "import androidx.compose.foundation.interaction.MutableInteractionSource",
+                  "import androidx.compose.foundation.interaction.collectIsPressedAsState",
+                  "import androidx.compose.ui.draw.drawBehind",
+                  "import androidx.compose.ui.draw.shadow",
+                  "import androidx.compose.ui.geometry.CornerRadius",
+                  "import androidx.compose.ui.geometry.Offset",
+                  "import androidx.compose.ui.graphics.drawscope.Stroke",
+                  "import androidx.compose.ui.graphics.StrokeCap",
+                  "import androidx.compose.ui.graphics.graphicsLayer",
+              ]
+              marker = "import androidx.compose.animation.animateContentSize"
+              for item in imports:
+                  if item not in s:
+                      s = s.replace(marker, marker + "\\n" + item, 1)
 
-          old_scan_filter = 'if ((!showHidden && child.name.startsWith(".")) || path.contains("/Android/data/")'
-          new_scan_filter = 'if (isPendingTemporaryName(child.name) || (!showHidden && child.name.startsWith(".")) || path.contains("/Android/data/")'
-          if new_scan_filter not in code:
-              if old_scan_filter not in code:
-                  raise SystemExit("Could not locate recursive scan filter for pending filenames")
-              code = code.replace(old_scan_filter, new_scan_filter, 1)
+              start = s.index("private val ThemePresets = listOf(")
+              end = s.index("\\nprivate val ActiveTheme", start)
+              themes = '''private val ThemePresets = listOf(
+              ThemePreset("Liquid Glass", Color(0xFF05040A), Color(0xFF111019), Color(0xFF191522), Color(0xB8211A30), Color(0xFFBD7BFF), Color(0xFF70E5FF), Color(0xFFB7ADC8), Color(0x554D3B67)),
+              ThemePreset("Arctic Aurora", Color(0xFF061019), Color(0xFF0D1C28), Color(0xFF142B3A), Color(0xB8173848), Color(0xFF65E7FF), Color(0xFF9EAFFF), Color(0xFFAFC7D7), Color(0x554D8AA0)),
+              ThemePreset("Rose Quartz", Color(0xFF140710), Color(0xFF21101C), Color(0xFF301728), Color(0xB83B1733), Color(0xFFFF7DB7), Color(0xFFFFC6E1), Color(0xFFD8B4C8), Color(0x665E2947)),
+              ThemePreset("Emerald Hologram", Color(0xFF030E0B), Color(0xFF0A1914), Color(0xFF102720), Color(0xB8224C3D), Color(0xFF70F0C0), Color(0xFFB7F68A), Color(0xFFAECFC1), Color(0x55407A66)),
+              ThemePreset("Sunset Prism", Color(0xFF130A14), Color(0xFF24131F), Color(0xFF31192A), Color(0xB83A1C30), Color(0xFFFF9B73), Color(0xFFFFD166), Color(0xFFD8B9C6), Color(0x665E344A)),
+              ThemePreset("Pure AMOLED", Color(0xFF000000), Color(0xFF090909), Color(0xFF111111), Color(0x99191919), Color(0xFFFFFFFF), Color(0xFFA6C8FF), Color(0xFFB8B8B8), Color(0x553D3D3D)),
+              ThemePreset("Nebula Bloom", Color(0xFF080617), Color(0xFF15102A), Color(0xFF21183E), Color(0xB82B2050), Color(0xFFC69BFF), Color(0xFFFF8BD6), Color(0xFFC7B8E4), Color(0x665D4689)),
+              ThemePreset("Aurora Mint", Color(0xFF04120F), Color(0xFF0B211C), Color(0xFF12382F), Color(0xB81B493C), Color(0xFF81FFD5), Color(0xFFC7FF9B), Color(0xFFB2D9CA), Color(0x5553A88C)),
+              ThemePreset("Ruby Chrome", Color(0xFF140609), Color(0xFF260C15), Color(0xFF39121E), Color(0xB83C1424), Color(0xFFFF5277), Color(0xFFFFA3B5), Color(0xFFE0BAC5), Color(0x665F263D)),
+              ThemePreset("Champagne Titanium", Color(0xFF100D08), Color(0xFF211B12), Color(0xFF302719), Color(0xB83A3020), Color(0xFFFFD58A), Color(0xFFE8E7E1), Color(0xFFD2C6AB), Color(0x665A4A2D))
+              )'''
+              s = s[:start] + themes + s[end:]
 
-          if not all(part in code for part in (
-              "import androidx.compose.foundation.border",
-              "private fun isPendingTemporaryName(name: String)",
-              "!isPendingTemporaryName(it.name)",
-              "if (isPendingTemporaryName(child.name)",
-          )):
-              raise SystemExit("Source verification failed after patching")
-          source.write_text(code)
-          print("Patched and verified Compose border import and .pending-* filename filtering.")
+              s = s.replace('    var compact by remember { mutableStateOf(prefs.getBoolean("compact_rows", false)) }', '    var compact by remember { mutableStateOf(prefs.getBoolean("compact_rows", false)) }\\n    var motionEnabled by remember { mutableStateOf(prefs.getBoolean("motion_effects", true))', 1)
+              s = s.replace('''    fun setCompactRows(value: Boolean) {
+                  compact = value
+                  prefs.edit().putBoolean("compact_rows", value).apply()
+              }''', '''    fun setCompactRows(value: Boolean) {
+                  compact = value
+                  prefs.edit().putBoolean("compact_rows", value).apply()
+              }
+              fun setMotionEffects(value: Boolean) {
+                  motionEnabled = value
+                  prefs.edit().putBoolean("motion_effects", value).apply()
+              }''', 1)
+              s = s.replace('                    compact = compact,\\n                    onSettings', '                    compact = compact,\\n                    motionEnabled = motionEnabled,\\n                    onSettings', 1)
+              s = s.replace('                    gridLayout = grid,\\n                    onGridLayout = { setGridLayout(it) },\\n                    onBack', '                    gridLayout = grid,\\n                    onGridLayout = { setGridLayout(it) },\\n                    motionEnabled = motionEnabled,\\n                    onMotionEffects = { setMotionEffects(it) },\\n                    onBack', 1)
+              s = s.replace('Column(Modifier.fillMaxSize().background(Ink).padding(scaffoldPadding).padding(horizontal = 16.dp)) {', 'Column(Modifier.fillMaxSize().liquidBackdrop(animate = motionEnabled).padding(scaffoldPadding).padding(horizontal = 16.dp)) {', 1)
+              s = s.replace('    recents: List<FileEntry>, compact: Boolean, onSettings: () -> Unit, onBrowse: () -> Unit,', '    recents: List<FileEntry>, compact: Boolean, motionEnabled: Boolean, onSettings: () -> Unit, onBrowse: () -> Unit,', 1)
+              s = s.replace('Column(modifier.fillMaxSize().background(Brush.verticalGradient(listOf(PanelLight.copy(alpha = .82f), Ink, Ink))).verticalScroll(scroll).padding(horizontal = 18.dp)) {', 'Column(modifier.fillMaxSize().liquidBackdrop(animate = motionEnabled).verticalScroll(scroll).padding(horizontal = 18.dp)) {', 1)
+              s = s.replace('Modifier.weight(1f)) { onCategory(', 'Modifier.weight(1f), animate = motionEnabled) { onCategory(')
+              hs = s.index("private fun HomeScreen(")
+              he = s.index("@Composable\\nprivate fun SettingsScreen(", hs)
+              s = s[:hs] + s[hs:he].replace("        GlassPanel {", "        GlassPanel(animate = motionEnabled) {") + s[he:]
+              s = s.replace('    gridLayout: Boolean,\\n    onGridLayout: (Boolean) -> Unit,\\n    onBack: () -> Unit,', '    gridLayout: Boolean,\\n    onGridLayout: (Boolean) -> Unit,\\n    motionEnabled: Boolean,\\n    onMotionEffects: (Boolean) -> Unit,\\n    onBack: () -> Unit,', 1)
+              s = s.replace('.background(Brush.verticalGradient(listOf(PanelLight.copy(alpha = .95f), Ink, Ink)))\\n            .verticalScroll', '.liquidBackdrop(animate = motionEnabled)\\n            .verticalScroll', 1)
+              ss = s.index("private fun SettingsScreen(")
+              se = s.index("@Composable\\nprivate fun CategoryCard(", ss)
+              settings = s[ss:se].replace("        GlassPanel {", "        GlassPanel(animate = motionEnabled) {")
+              needle = '''            HorizontalDivider(color = Border)
+                          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)) {
+                              Box(Modifier.size(40.dp).clip(RoundedCornerShape(13.dp)).background(Glass), contentAlignment = Alignment.Center) { Icon(Icons.Default.Visibility, null, tint = Cyan) }'''
+              repl = '''            HorizontalDivider(color = Border)
+                          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)) {
+                              Box(Modifier.size(40.dp).clip(RoundedCornerShape(13.dp)).background(Glass), contentAlignment = Alignment.Center) { Icon(Icons.Default.AutoAwesome, null, tint = Purple) }
+                              Spacer(Modifier.width(12.dp))
+                              Column(Modifier.weight(1f)) {
+                                  Text("Liquid motion", color = Color.White, fontWeight = FontWeight.SemiBold)
+                                  Text("Moving light, ambient glow and springy touch feedback", color = Muted, style = MaterialTheme.typography.bodySmall)
+                              }
+                              Switch(checked = motionEnabled, onCheckedChange = onMotionEffects, colors = SwitchDefaults.colors(checkedThumbColor = Ink, checkedTrackColor = Purple))
+                          }
+                          HorizontalDivider(color = Border)
+                          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)) {
+                              Box(Modifier.size(40.dp).clip(RoundedCornerShape(13.dp)).background(Glass), contentAlignment = Alignment.Center) { Icon(Icons.Default.Visibility, null, tint = Cyan) }'''
+              if needle not in settings:
+                  raise SystemExit("Could not find settings location for Liquid motion")
+              settings = settings.replace(needle, repl, 1)
+              s = s[:ss] + settings + s[se:]
+
+              cs = s.index("@Composable\\nprivate fun CategoryCard(")
+              ce = s.index("@Composable\\nprivate fun GlassSearchField(", cs)
+              components = '''@Composable
+              private fun CategoryCard(
+                  title: String, subtitle: String, icon: androidx.compose.ui.graphics.vector.ImageVector,
+                  tint: Color, modifier: Modifier = Modifier, animate: Boolean = true, onClick: () -> Unit
+              ) {
+                  val shape = RoundedCornerShape(22.dp)
+                  val interaction = remember { MutableInteractionSource() }
+                  val pressed by interaction.collectIsPressedAsState()
+                  val scale by animateFloatAsState(if (pressed) .975f else 1f, animationSpec = spring(stiffness = 650f, dampingRatio = .72f), label = "categoryPressScale")
+                  Column(modifier.graphicsLayer { scaleX = scale; scaleY = scale }
+                      .liquidGlassSurface(shape, animate)
+                      .clickable(interactionSource = interaction, indication = null, onClick = onClick)
+                      .padding(14.dp).heightIn(min = 96.dp)) {
+                      Box(Modifier.size(38.dp).clip(RoundedCornerShape(13.dp))
+                          .background(Brush.linearGradient(listOf(tint.copy(alpha = .24f), Color.White.copy(alpha = .06f))))
+                          .border(1.dp, tint.copy(alpha = .22f), RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) { Icon(icon, null, tint = tint) }
+                      Spacer(Modifier.height(10.dp))
+                      Text(title, color = Color.White, fontWeight = FontWeight.Bold)
+                      Text(subtitle, color = Muted, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                  }
+              }
+
+              @Composable
+              private fun GlassPanel(animate: Boolean = true, content: @Composable ColumnScope.() -> Unit) {
+                  Column(Modifier.fillMaxWidth().liquidGlassSurface(RoundedCornerShape(24.dp), animate).padding(15.dp), content = content)
+              }
+
+              @Composable
+              private fun Modifier.liquidGlassSurface(shape: RoundedCornerShape, animate: Boolean = true): Modifier {
+                  val transition = rememberInfiniteTransition(label = "liquidGlassSurface")
+                  val sweep by transition.animateFloat(-.85f, 1.85f,
+                      infiniteRepeatable(tween(if (animate) 5200 else 90000, easing = LinearEasing), RepeatMode.Restart), label = "specularSweep")
+                  return this.shadow(18.dp, shape, clip = false).clip(shape)
+                      .background(Brush.linearGradient(listOf(Color.White.copy(alpha = .115f), Glass.copy(alpha = .52f), Panel.copy(alpha = .46f), PanelLight.copy(alpha = .38f)), Offset(0f, 0f), Offset(900f, 900f)))
+                      .drawBehind {
+                          val radius = CornerRadius(25.dp.toPx())
+                          drawRoundRect(brush = Brush.radialGradient(listOf(Purple.copy(alpha = .13f), Color.Transparent), Offset(size.width * .08f, size.height * .02f), size.minDimension * .90f), cornerRadius = radius)
+                          drawRoundRect(brush = Brush.linearGradient(listOf(Color.Transparent, Color.White.copy(alpha = .025f), Color.White.copy(alpha = .115f), Color.White.copy(alpha = .025f), Color.Transparent), Offset(size.width * (sweep - .52f), 0f), Offset(size.width * (sweep + .16f), size.height)), cornerRadius = radius)
+                          drawLine(brush = Brush.horizontalGradient(listOf(Color.Transparent, Color.White.copy(alpha = .50f), Cyan.copy(alpha = .24f), Color.Transparent)), start = Offset(18.dp.toPx(), 1.dp.toPx()), end = Offset(size.width - 18.dp.toPx(), 1.dp.toPx()), strokeWidth = 1.dp.toPx(), cap = StrokeCap.Round)
+                      }
+                      .border(BorderStroke(1.dp, Brush.linearGradient(listOf(Color.White.copy(alpha = .30f), Border.copy(alpha = .85f), Cyan.copy(alpha = .14f), Color.White.copy(alpha = .07f)))), shape)
+              }
+
+              @Composable
+              private fun Modifier.liquidBackdrop(animate: Boolean = true): Modifier {
+                  val transition = rememberInfiniteTransition(label = "ambientGlassBackdrop")
+                  val drift by transition.animateFloat(0f, 1f, infiniteRepeatable(tween(if (animate) 11000 else 90000, easing = LinearEasing), RepeatMode.Reverse), label = "ambientDrift")
+                  return this.drawBehind {
+                      drawRect(Ink)
+                      val radius = size.minDimension * .88f
+                      val left = Offset(size.width * (.12f + .16f * drift), size.height * .13f)
+                      val right = Offset(size.width * (.92f - .14f * drift), size.height * .48f)
+                      drawCircle(Brush.radialGradient(listOf(Purple.copy(alpha = if (animate) .18f else .10f), Color.Transparent), left, radius), radius, left)
+                      drawCircle(Brush.radialGradient(listOf(Cyan.copy(alpha = if (animate) .10f else .05f), Color.Transparent), right, radius * .70f), radius * .70f, right)
+                  }
+              }
+
+              '''
+              # remove the Python indentation added for literal source code
+              import textwrap
+              s = s[:cs] + textwrap.dedent(components) + s[ce:]
+
+              # Make file list rows and cards use translucent glass plus spring touch feedback.
+              old = '''    Card(
+                  colors = CardDefaults.cardColors(containerColor = Color(0xCC121019)), shape = RoundedCornerShape(19.dp),
+                  border = BorderStroke(1.dp, Color(0x332F2642)), modifier = Modifier.fillMaxWidth().combinedClickable(onClick = onClick, onLongClick = onLongClick).animateContentSize()
+              ) {'''
+              new = '''    val shape = RoundedCornerShape(19.dp)
+              val interaction = remember { MutableInteractionSource() }
+              val pressed by interaction.collectIsPressedAsState()
+              val scale by animateFloatAsState(if (pressed) .985f else 1f, animationSpec = spring(stiffness = 700f), label = "fileRowPressScale")
+              Card(colors = CardDefaults.cardColors(containerColor = Color.Transparent), shape = shape,
+                  modifier = Modifier.fillMaxWidth().graphicsLayer { scaleX = scale; scaleY = scale }
+                      .liquidGlassSurface(shape, animate = false)
+                      .combinedClickable(interactionSource = interaction, indication = null, onClick = onClick, onLongClick = onLongClick)
+                      .animateContentSize(spring(stiffness = 500f))) {'''
+              s = s.replace(old, new, 1)
+              old = '''    Card(colors = CardDefaults.cardColors(containerColor = Glass.copy(alpha = .78f)), shape = RoundedCornerShape(21.dp), border = BorderStroke(1.dp, Border), modifier = Modifier.fillMaxWidth().combinedClickable(onClick = onClick, onLongClick = onLongClick)) {'''
+              new = '''    val shape = RoundedCornerShape(21.dp)
+              val interaction = remember { MutableInteractionSource() }
+              val pressed by interaction.collectIsPressedAsState()
+              val scale by animateFloatAsState(if (pressed) .975f else 1f, animationSpec = spring(stiffness = 680f), label = "fileTilePressScale")
+              Card(colors = CardDefaults.cardColors(containerColor = Color.Transparent), shape = shape, modifier = Modifier.fillMaxWidth()
+                  .graphicsLayer { scaleX = scale; scaleY = scale }.liquidGlassSurface(shape, animate = false)
+                  .combinedClickable(interactionSource = interaction, indication = null, onClick = onClick, onLongClick = onLongClick)) {'''
+              s = s.replace(old, new, 1)
+
+          # Bump app version so Android can update over the existing installation.
+          gradle = Path("native-project/app/build.gradle.kts")
+          gs = gradle.read_text().replace("versionCode = 2", "versionCode = 3").replace('versionName = "1.1"', 'versionName = "1.2"')
+          gradle.write_text(gs)
+          source.write_text(s)
+          themes = s.count('ThemePreset("')
+          if themes != 10 or "private fun Modifier.liquidGlassSurface" not in s or "private fun Modifier.liquidBackdrop" not in s:
+              raise SystemExit(f"Glass upgrade verification failed: theme count={themes}")
+          print(f"Installed and verified liquid-glass UI with {themes} themes, motion toggle and spring interactions.")
           PY
 
       - name: Build debug APK
