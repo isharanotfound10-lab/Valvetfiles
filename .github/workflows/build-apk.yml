@@ -315,8 +315,8 @@ jobs:
           s = s.replace(old_delete, new_delete)
           s = s.replace('Text(if (dialog == "delete") "Delete" else "Save", color = if (dialog == "delete") Color(0xFFFF8A9A) else accent)', 'Text(if (dialog == "delete" || dialog == "bulk_delete") "Delete" else "Save", color = if (dialog == "delete" || dialog == "bulk_delete") Color(0xFFFF8A9A) else accent)')
           s = s.replace('selected = null; dialog = ""; refresh()', 'selected = null; selectedPaths = emptySet(); dialog = ""; refresh()')
-          start = s.index('    @Composable\nprivate fun Modifier.liquidGlassSurface(') if '    @Composable\nprivate fun Modifier.liquidGlassSurface(' in s else s.index('@Composable\nprivate fun Modifier.liquidGlassSurface(')
-          end = s.index('@Composable\nprivate fun Modifier.liquidBackdrop', start)
+          start = s.index('    @Composable\\n    private fun Modifier.liquidGlassSurface(')
+          end = s.index('    @Composable\\n    private fun Modifier.liquidBackdrop', start)
           glass = '''@Composable
           private fun Modifier.liquidGlassSurface(shape: RoundedCornerShape, animate: Boolean = true): Modifier {
               val transition = rememberInfiniteTransition(label = "liquidGlassSurface")
