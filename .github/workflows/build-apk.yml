@@ -1,0 +1,53 @@
+name: Build Velvet Files APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "Velvet_Files_Native_Android_Project.zip"
+      - ".github/workflows/build-apk.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: "8.10.2"
+
+      - name: Extract project
+        run: |
+          mkdir -p native-project
+          unzip -o Velvet_Files_Native_Android_Project.zip -d native-project
+
+      - name: Build APK
+        run: gradle -p native-project assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Velvet-Files-APK
+          path: native-project/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 7
