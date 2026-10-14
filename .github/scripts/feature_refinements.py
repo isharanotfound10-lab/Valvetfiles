@@ -5,7 +5,7 @@ s = p.read_text()
 
 def once(old, new, label):
     global s
-    if new in s:
+    if new and new in s:
         return
     if old not in s:
         raise SystemExit("Could not locate " + label + "; refusing to apply partial patch")
