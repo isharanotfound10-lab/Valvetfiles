@@ -124,7 +124,7 @@ if "miniAudioCollapsed" not in s[s.index("if (miniAudioPlaying && !miniAudioPath
                 }.then(if (motionEnabled) Modifier.animateContentSize() else Modifier)) {""", 1)
     panel_start = s.index("GlassPanel(modifier = Modifier.pointerInput(motionEnabled)", player_start)
     # Locate the opening brace of the GlassPanel content lambda, after the modifier argument.
-    panel_open = s.index(") {", panel_start) + 2
+    panel_open = s.index(")) {", panel_start) + 3
     depth = 0
     in_string = False
     quote = ""
