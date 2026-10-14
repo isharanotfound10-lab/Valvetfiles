@@ -18,7 +18,7 @@ gradle.write_text(g)
 
 s = source.read_text()
 old_call = 'VideoPlayerPanel(file, queue.filter { isVideoFile(it) }, Modifier.weight(1f).fillMaxWidth(), onNavigate, onVideoProgress)'
-new_call = 'VlcVideoPlayerPanel(file, queue.filter { isVideoFile(it) }, Modifier.weight(1f).fillMaxWidth(), onNavigate, onVideoProgress)'
+new_call = old_call  # Keep the existing player until the VLC crash is diagnosed
 if new_call not in s:
     if old_call not in s:
         raise SystemExit("Could not locate existing video-player call")
