@@ -57,6 +57,10 @@ once('if (!miniAudioPath.isNullOrBlank() && File(miniAudioPath!!).isFile) {',
      'if (!miniAudioPath.isNullOrBlank() && File(miniAudioPath!!).isFile) {',
      "mini-player visibility anchor")
 
+once('if (!miniAudioPath.isNullOrBlank() && File(miniAudioPath!!).isFile) {',
+     'if (miniAudioPlaying && !miniAudioPath.isNullOrBlank() && File(miniAudioPath!!).isFile) {',
+     "hide mini-player unless audio is actively playing")
+
 old_art = 'Box(Modifier.size(42.dp).clip(RoundedCornerShape(12.dp)).background(Brush.radialGradient(listOf(Purple.copy(alpha = .65f), Glass, Ink))), contentAlignment = Alignment.Center) { Icon(Icons.Default.MusicNote, null, tint = Cyan) }'
 new_art = '''Box(Modifier.size(46.dp).clip(RoundedCornerShape(12.dp)).background(Brush.radialGradient(listOf(Purple.copy(alpha = .65f), Glass, Ink))), contentAlignment = Alignment.Center) {
                                         val cover = miniAudioArtwork
