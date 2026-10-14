@@ -92,9 +92,10 @@ once('''    val video = isVideoFile(file)
 media_start = s.index("private fun MediaPlayerScreen(")
 media_end = s.index("@OptIn(ExperimentalMaterial3Api::class)\n@Composable\nprivate fun VlcVideoPlayerPanel(", media_start)
 media_block = s[media_start:media_end]
-video_start = media_block.index("            VlcVideoPlayerPanel(")
-video_end = media_block.index("        } else {", video_start)
-video_chunk = '''            VlcVideoPlayerPanel(file, queue.filter { isVideoFile(it) }, Modifier.weight(1f).fillMaxWidth(), onNavigate, onVideoProgress, videoFullscreen, { videoFullscreen = it })
+if "            VlcVideoPlayerPanel(" in media_block:
+    video_start = media_block.index("            VlcVideoPlayerPanel(")
+    video_end = media_block.index("        } else {", video_start)
+    video_chunk = '''            VlcVideoPlayerPanel(file, queue.filter { isVideoFile(it) }, Modifier.weight(1f).fillMaxWidth(), onNavigate, onVideoProgress, videoFullscreen, { videoFullscreen = it })
             if (!videoFullscreen) {
                 Spacer(Modifier.height(8.dp))
                 GlassPanel(animate = false) {
@@ -103,8 +104,10 @@ video_chunk = '''            VlcVideoPlayerPanel(file, queue.filter { isVideoFil
                 }
             }
 '''
-media_block = media_block[:video_start] + video_chunk + media_block[video_end:]
-s = s[:media_start] + media_block + s[media_end:]
+    media_block = media_block[:video_start] + video_chunk + media_block[video_end:]
+    s = s[:media_start] + media_block + s[media_end:]
+else:
+    print("Keeping the original video-player call; skipping VLC-only fullscreen rewrite.")
 once('''        Spacer(Modifier.height(8.dp))
     }
 }
