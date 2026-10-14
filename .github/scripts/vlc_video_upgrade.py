@@ -11,6 +11,9 @@ if dep not in g:
         raise SystemExit("Could not locate app dependencies block")
     g = g.replace("dependencies {\n", "dependencies {\n" + dep + "\n", 1)
 g = g.replace("versionCode = 6", "versionCode = 7").replace('versionName = "1.5"', 'versionName = "1.6"')
+abi = '        ndk { abiFilters += setOf("arm64-v8a", "armeabi-v7a") }'
+if abi not in g:
+    g = g.replace('versionName = "1.6"\n', 'versionName = "1.6"\n' + abi + '\n', 1)
 gradle.write_text(g)
 
 s = source.read_text()
