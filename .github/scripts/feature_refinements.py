@@ -13,16 +13,17 @@ def once(old, new, label):
 
 # Keep both browsing layouts alive while the player temporarily replaces the file list.
 once("import androidx.compose.foundation.lazy.LazyColumn\n",
-     "import androidx.compose.foundation.lazy.LazyColumn\nimport androidx.compose.foundation.lazy.rememberLazyListState\nimport androidx.compose.foundation.lazy.grid.rememberLazyGridState\n",
+     "import androidx.compose.foundation.lazy.LazyColumn\nimport androidx.compose.foundation.lazy.rememberLazyListState\nimport androidx.compose.foundation.lazy.grid.rememberLazyGridState\nimport androidx.compose.foundation.gestures.detectVerticalDragGestures\nimport androidx.compose.ui.input.pointer.pointerInput\n",
      "lazy-list imports")
 once("import androidx.compose.ui.text.font.FontWeight\n",
      "import androidx.compose.ui.text.font.FontWeight\nimport androidx.compose.ui.text.font.FontFamily\nimport androidx.compose.ui.text.TextStyle\nimport androidx.compose.foundation.text.BasicTextField\n",
      "code-editor imports")
 once('    var refreshKey by remember { mutableIntStateOf(0) }\n',
-     '    var refreshKey by remember { mutableIntStateOf(0) }\n    val browseListState = rememberLazyListState()\n    val browseGridState = rememberLazyGridState()\n    var miniAudioArtwork by remember { mutableStateOf<Bitmap?>(null) }\n',
+     '    var refreshKey by remember { mutableIntStateOf(0) }\n    val browseListState = rememberLazyListState()\n    val browseGridState = rememberLazyGridState()\n    var miniAudioArtwork by remember { mutableStateOf<Bitmap?>(null) }\n    var miniAudioCollapsed by remember { mutableStateOf(false) }\n',
      "persistent browsing state")
 once('    LaunchedEffect(themeName, customAccentArgb) {\n',
      '''    LaunchedEffect(miniAudioPath) {
+        miniAudioCollapsed = false
         miniAudioArtwork = withContext(Dispatchers.IO) {
             val path = miniAudioPath
             if (path.isNullOrBlank() || !File(path).isFile) null else {
@@ -60,6 +61,99 @@ once('if (!miniAudioPath.isNullOrBlank() && File(miniAudioPath!!).isFile) {',
 once('if (!miniAudioPath.isNullOrBlank() && File(miniAudioPath!!).isFile) {',
      'if (miniAudioPlaying && !miniAudioPath.isNullOrBlank() && File(miniAudioPath!!).isFile) {',
      "hide mini-player unless audio is actively playing")
+
+# Add a swipe-down collapse affordance to the mini audio player.
+if "miniAudioCollapsed" not in s[s.index("if (miniAudioPlaying && !miniAudioPath"):s.index("old_art =")]:
+    player_start = s.index("if (miniAudioPlaying && !miniAudioPath.isNullOrBlank() && File(miniAudioPath!!).isFile) {")
+    panel_start = s.index("GlassPanel {", player_start)
+    # Find the end of this GlassPanel content block with a simple Kotlin brace scan.
+    panel_open = s.index("{", panel_start + len("GlassPanel "))
+    depth = 0
+    in_string = False
+    quote = ""
+    escaped = False
+    panel_end = None
+    for i in range(panel_open, len(s)):
+        ch = s[i]
+        if in_string:
+            if escaped:
+                escaped = False
+            elif ch == "\\":
+                escaped = True
+            elif ch == quote:
+                in_string = False
+            continue
+        if ch in ('"', "'"):
+            in_string = True
+            quote = ch
+            continue
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                panel_end = i
+                break
+    if panel_end is None:
+        raise SystemExit("Could not locate mini-player panel boundary")
+    compact_panel = """if (miniAudioCollapsed) {
+                GlassPanel(modifier = if (motionEnabled) Modifier.animateContentSize() else Modifier) {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.MusicNote, null, tint = Cyan)
+                        Spacer(Modifier.width(10.dp))
+                        Text(miniAudioTitle, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                        IconButton(onClick = { miniAudioCollapsed = false }) { Icon(Icons.Default.ExpandLess, "Expand audio player", tint = Purple) }
+                    }
+                }
+            } else {
+                """
+    s = s[:panel_start] + compact_panel + s[panel_start:]
+    panel_start = s.index("GlassPanel {", player_start)
+    s = s[:panel_start] + s[panel_start:].replace("GlassPanel {", """GlassPanel(modifier = Modifier.pointerInput(motionEnabled) {
+                    var downwardDrag = 0f
+                    detectVerticalDragGestures(
+                        onDragStart = { downwardDrag = 0f },
+                        onVerticalDrag = { change, dragAmount ->
+                            downwardDrag += dragAmount
+                            if (downwardDrag > 36f) {
+                                miniAudioCollapsed = true
+                                change.consume()
+                            }
+                        }
+                    )
+                }.then(if (motionEnabled) Modifier.animateContentSize() else Modifier)) {""", 1)
+    panel_start = s.index("GlassPanel(modifier = Modifier.pointerInput(motionEnabled)", player_start)
+    # Locate the opening brace of the GlassPanel content lambda, after the modifier argument.
+    panel_open = s.index(") {", panel_start) + 2
+    depth = 0
+    in_string = False
+    quote = ""
+    escaped = False
+    panel_end = None
+    for i in range(panel_open, len(s)):
+        ch = s[i]
+        if in_string:
+            if escaped:
+                escaped = False
+            elif ch == "\\":
+                escaped = True
+            elif ch == quote:
+                in_string = False
+            continue
+        if ch in ('"', "'"):
+            in_string = True
+            quote = ch
+            continue
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                panel_end = i
+                break
+    if panel_end is None:
+        raise SystemExit("Could not close swipe-enabled mini-player")
+    s = s[:panel_end + 1] + "\n            }" + s[panel_end + 1:]
 
 old_art = 'Box(Modifier.size(42.dp).clip(RoundedCornerShape(12.dp)).background(Brush.radialGradient(listOf(Purple.copy(alpha = .65f), Glass, Ink))), contentAlignment = Alignment.Center) { Icon(Icons.Default.MusicNote, null, tint = Cyan) }'
 new_art = '''Box(Modifier.size(46.dp).clip(RoundedCornerShape(12.dp)).background(Brush.radialGradient(listOf(Purple.copy(alpha = .65f), Glass, Ink))), contentAlignment = Alignment.Center) {
