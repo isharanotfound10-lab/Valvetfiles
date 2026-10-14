@@ -144,6 +144,14 @@ if old_fullscreen_button not in vlc_block:
 vlc_block = vlc_block.replace(old_fullscreen_button, new_fullscreen_button, 1)
 s = s[:vlc_start] + vlc_block + s[vlc_end:]
 
+# Expand preview routing so the editor can open common programming languages.
+text_preview_old = 'private fun isTextPreview(file: File): Boolean = file.extension.lowercase() in setOf("txt", "md", "markdown", "json", "xml", "kt", "java", "log", "csv", "html", "htm", "css", "js", "properties", "yml", "yaml", "gradle", "sh")'
+text_preview_new = 'private fun isTextPreview(file: File): Boolean = file.extension.lowercase() in setOf("txt", "md", "markdown", "json", "xml", "kt", "kts", "java", "py", "log", "csv", "html", "htm", "css", "scss", "js", "ts", "jsx", "tsx", "sql", "properties", "yml", "yaml", "toml", "ini", "gradle", "sh", "bash", "c", "h", "cpp", "hpp", "rs", "go", "php", "rb", "swift", "dart")'
+if text_preview_old in s:
+    s = s.replace(text_preview_old, text_preview_new, 1)
+elif text_preview_new not in s:
+    raise SystemExit("Could not expand code-file preview extensions")
+
 # Turn source/config text previews into a practical native code editor.
 once('''    val imageMode = isImageFile(file)
     val pdfMode = file.extension.equals("pdf", true)
