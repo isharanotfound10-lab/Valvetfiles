@@ -85,14 +85,12 @@ once('''    val video = isVideoFile(file)
     Column(modifier.fillMaxSize().then(if (videoFullscreen) Modifier.background(Color.Black) else Modifier.liquidBackdrop(animate = true).padding(horizontal = 14.dp))) {
         if (!videoFullscreen) Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 7.dp)) {
 ''', "media-player fullscreen parent layout")
-once('''            VlcVideoPlayerPanel(file, queue.filter { isVideoFile(it) }, Modifier.weight(1f).fillMaxWidth(), onNavigate, onVideoProgress)
-            Spacer(Modifier.height(8.dp))
-            GlassPanel(animate = false) {
-                Text(file.name, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Text("\${file.extension.uppercase()} · \${humanSize(file.length())} · " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(file.lastModified())), color = Muted, style = MaterialTheme.typography.bodySmall)
-            }
-''',
-'''            VlcVideoPlayerPanel(file, queue.filter { isVideoFile(it) }, Modifier.weight(1f).fillMaxWidth(), onNavigate, onVideoProgress, videoFullscreen, { videoFullscreen = it })
+media_start = s.index("private fun MediaPlayerScreen(")
+media_end = s.index("@OptIn(ExperimentalMaterial3Api::class)\n@Composable\nprivate fun VlcVideoPlayerPanel(", media_start)
+media_block = s[media_start:media_end]
+video_start = media_block.index("            VlcVideoPlayerPanel(")
+video_end = media_block.index("        } else {", video_start)
+video_chunk = '''            VlcVideoPlayerPanel(file, queue.filter { isVideoFile(it) }, Modifier.weight(1f).fillMaxWidth(), onNavigate, onVideoProgress, videoFullscreen, { videoFullscreen = it })
             if (!videoFullscreen) {
                 Spacer(Modifier.height(8.dp))
                 GlassPanel(animate = false) {
@@ -100,7 +98,9 @@ once('''            VlcVideoPlayerPanel(file, queue.filter { isVideoFile(it) }, 
                     Text("\${file.extension.uppercase()} · \${humanSize(file.length())} · " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(file.lastModified())), color = Muted, style = MaterialTheme.typography.bodySmall)
                 }
             }
-''', "VLC player fullscreen callback")
+'''
+media_block = media_block[:video_start] + video_chunk + media_block[video_end:]
+s = s[:media_start] + media_block + s[media_end:]
 once('''        Spacer(Modifier.height(8.dp))
     }
 }
