@@ -62,99 +62,71 @@ once('if (!miniAudioPath.isNullOrBlank() && File(miniAudioPath!!).isFile) {',
      'if (miniAudioPlaying && !miniAudioPath.isNullOrBlank() && File(miniAudioPath!!).isFile) {',
      "hide mini-player unless audio is actively playing")
 
-# Add a swipe-down collapse affordance to the mini audio player.
-if "miniAudioCollapsed" not in s[s.index("if (miniAudioPlaying && !miniAudioPath"):s.index("LazyVerticalGrid", s.index("if (miniAudioPlaying && !miniAudioPath"))]:
-    player_start = s.index("if (miniAudioPlaying && !miniAudioPath.isNullOrBlank() && File(miniAudioPath!!).isFile) {")
-    panel_start = s.index("GlassPanel {", player_start)
-    # Find the end of this GlassPanel content block with a simple Kotlin brace scan.
-    panel_open = s.index("{", panel_start + len("GlassPanel "))
-    depth = 0
-    in_string = False
-    quote = ""
-    escaped = False
-    panel_end = None
-    for i in range(panel_open, len(s)):
-        ch = s[i]
-        if in_string:
-            if escaped:
-                escaped = False
-            elif ch == "\\":
-                escaped = True
-            elif ch == quote:
-                in_string = False
-            continue
-        if ch in ('"', "'"):
-            in_string = True
-            quote = ch
-            continue
-        if ch == "{":
-            depth += 1
-        elif ch == "}":
-            depth -= 1
-            if depth == 0:
-                panel_end = i
-                break
-    if panel_end is None:
-        raise SystemExit("Could not locate mini-player panel boundary")
-    compact_panel = """if (miniAudioCollapsed) {
-                GlassPanel(modifier = if (motionEnabled) Modifier.animateContentSize() else Modifier) {
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.MusicNote, null, tint = Cyan)
-                        Spacer(Modifier.width(10.dp))
-                        Text(miniAudioTitle, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                        IconButton(onClick = { miniAudioCollapsed = false }) { Icon(Icons.Default.ExpandLess, "Expand audio player", tint = Purple) }
-                    }
-                }
-            } else {
-                """
-    s = s[:panel_start] + compact_panel + s[panel_start:]
-    panel_start = s.index("GlassPanel {", player_start)
-    s = s[:panel_start] + s[panel_start:].replace("GlassPanel {", """GlassPanel(modifier = Modifier.pointerInput(motionEnabled) {
-                    var downwardDrag = 0f
-                    detectVerticalDragGestures(
-                        onDragStart = { downwardDrag = 0f },
-                        onVerticalDrag = { change, dragAmount ->
-                            downwardDrag += dragAmount
-                            if (downwardDrag > 36f) {
-                                miniAudioCollapsed = true
-                                change.consume()
+# Replace the mini-player at its real Scaffold bottom-bar location.
+old_player = '''                        if (miniAudioPlaying && !miniAudioPath.isNullOrBlank() && File(miniAudioPath!!).isFile) {
+                            GlassPanel(animate = true) {
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                                    Box(Modifier.size(42.dp).clip(RoundedCornerShape(12.dp)).background(Brush.radialGradient(listOf(Purple.copy(alpha = .65f), Glass, Ink))), contentAlignment = Alignment.Center) { Icon(Icons.Default.MusicNote, null, tint = Cyan) }
+                                    Spacer(Modifier.width(10.dp))
+                                    Column(Modifier.weight(1f).clickable {
+                                        val target = File(miniAudioPath!!)
+                                        playerQueue = (entries + recents).filter { !it.directory && (isAudioFile(it.file) || isVideoFile(it.file)) }.distinctBy { it.file.absolutePath }.map { it.file }.let { q -> if (q.any { it.absolutePath == target.absolutePath }) q else listOf(target) + q }
+                                        playerFile = target
+                                    }) { Text(miniAudioTitle, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold); Text(if (miniAudioPlaying) "Playing in background" else "Ready to resume", color = Muted, style = MaterialTheme.typography.labelSmall) }
+                                    IconButton(onClick = {
+                                        val path = miniAudioPath
+                                        val q = (entries + recents).filter { !it.directory && isAudioFile(it.file) }.distinctBy { it.file.absolutePath }.map { it.file.absolutePath }.toCollection(ArrayList())
+                                        val i = Intent(context, VelvetAudioService::class.java).setAction(VelvetAudioService.ACTION_TOGGLE).putExtra(VelvetAudioService.EXTRA_PATH, path).putStringArrayListExtra(VelvetAudioService.EXTRA_QUEUE, q)
+                                        ContextCompat.startForegroundService(context, i)
+                                    }) { Icon(if (miniAudioPlaying) Icons.Default.Pause else Icons.Default.PlayArrow, if (miniAudioPlaying) "Pause audio" else "Resume audio", tint = accent) }
+                                    IconButton(onClick = { ContextCompat.startForegroundService(context, Intent(context, VelvetAudioService::class.java).setAction(VelvetAudioService.ACTION_STOP)) }) { Icon(Icons.Default.Close, "Stop audio", tint = Muted) }
+                                }
                             }
-                        }
-                    )
-                }.then(if (motionEnabled) Modifier.animateContentSize() else Modifier)) {""", 1)
-    panel_start = s.index("GlassPanel(modifier = Modifier.pointerInput(motionEnabled)", player_start)
-    # Locate the opening brace of the GlassPanel content lambda, after the modifier argument.
-    panel_open = s.index(")) {", panel_start) + 3
-    depth = 0
-    in_string = False
-    quote = ""
-    escaped = False
-    panel_end = None
-    for i in range(panel_open, len(s)):
-        ch = s[i]
-        if in_string:
-            if escaped:
-                escaped = False
-            elif ch == "\\":
-                escaped = True
-            elif ch == quote:
-                in_string = False
-            continue
-        if ch in ('"', "'"):
-            in_string = True
-            quote = ch
-            continue
-        if ch == "{":
-            depth += 1
-        elif ch == "}":
-            depth -= 1
-            if depth == 0:
-                panel_end = i
-                break
-    if panel_end is None:
-        raise SystemExit("Could not close swipe-enabled mini-player")
-    s = s[:panel_end + 1] + "\n            }" + s[panel_end + 1:]
-
+                        }'''
+new_player = '''                        if (miniAudioPlaying && !miniAudioPath.isNullOrBlank() && File(miniAudioPath!!).isFile) {
+                            if (miniAudioCollapsed) {
+                                GlassPanel(animate = motionEnabled, modifier = Modifier.clickable { miniAudioCollapsed = false }) {
+                                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                                        Icon(Icons.Default.MusicNote, null, tint = Cyan)
+                                        Spacer(Modifier.width(10.dp))
+                                        Text(miniAudioTitle, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                                        IconButton(onClick = { miniAudioCollapsed = false }) { Icon(Icons.Default.ExpandLess, "Expand audio player", tint = accent) }
+                                    }
+                                }
+                            } else {
+                                GlassPanel(animate = motionEnabled, modifier = Modifier.pointerInput(motionEnabled) {
+                                    var downwardDrag = 0f
+                                    detectVerticalDragGestures(
+                                        onDragStart = { downwardDrag = 0f },
+                                        onVerticalDrag = { change, dragAmount ->
+                                            downwardDrag += dragAmount
+                                            if (downwardDrag > 36f) {
+                                                miniAudioCollapsed = true
+                                                change.consume()
+                                            }
+                                        }
+                                    )
+                                }) {
+                                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                                        Box(Modifier.size(42.dp).clip(RoundedCornerShape(12.dp)).background(Brush.radialGradient(listOf(Purple.copy(alpha = .65f), Glass, Ink))), contentAlignment = Alignment.Center) { Icon(Icons.Default.MusicNote, null, tint = Cyan) }
+                                        Spacer(Modifier.width(10.dp))
+                                        Column(Modifier.weight(1f).clickable {
+                                            val target = File(miniAudioPath!!)
+                                            playerQueue = (entries + recents).filter { !it.directory && (isAudioFile(it.file) || isVideoFile(it.file)) }.distinctBy { it.file.absolutePath }.map { it.file }.let { q -> if (q.any { it.absolutePath == target.absolutePath }) q else listOf(target) + q }
+                                            playerFile = target
+                                        }) { Text(miniAudioTitle, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold); Text(if (miniAudioPlaying) "Playing in background" else "Ready to resume", color = Muted, style = MaterialTheme.typography.labelSmall) }
+                                        IconButton(onClick = {
+                                            val path = miniAudioPath
+                                            val q = (entries + recents).filter { !it.directory && isAudioFile(it.file) }.distinctBy { it.file.absolutePath }.map { it.file.absolutePath }.toCollection(ArrayList())
+                                            val i = Intent(context, VelvetAudioService::class.java).setAction(VelvetAudioService.ACTION_TOGGLE).putExtra(VelvetAudioService.EXTRA_PATH, path).putStringArrayListExtra(VelvetAudioService.EXTRA_QUEUE, q)
+                                            ContextCompat.startForegroundService(context, i)
+                                        }) { Icon(if (miniAudioPlaying) Icons.Default.Pause else Icons.Default.PlayArrow, if (miniAudioPlaying) "Pause audio" else "Resume audio", tint = accent) }
+                                        IconButton(onClick = { ContextCompat.startForegroundService(context, Intent(context, VelvetAudioService::class.java).setAction(VelvetAudioService.ACTION_STOP)) }) { Icon(Icons.Default.Close, "Stop audio", tint = Muted) }
+                                    }
+                                }
+                            }
+                        }'''
+once(old_player, new_player, "swipe-down mini-player collapse")
 old_art = 'Box(Modifier.size(42.dp).clip(RoundedCornerShape(12.dp)).background(Brush.radialGradient(listOf(Purple.copy(alpha = .65f), Glass, Ink))), contentAlignment = Alignment.Center) { Icon(Icons.Default.MusicNote, null, tint = Cyan) }'
 new_art = '''Box(Modifier.size(46.dp).clip(RoundedCornerShape(12.dp)).background(Brush.radialGradient(listOf(Purple.copy(alpha = .65f), Glass, Ink))), contentAlignment = Alignment.Center) {
                                         val cover = miniAudioArtwork
