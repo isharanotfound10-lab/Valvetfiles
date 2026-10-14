@@ -215,12 +215,12 @@ once('''            text != null -> androidx.compose.foundation.text.selection.S
 ''',
 '''            text != null && editingCode -> Column(Modifier.weight(1f).fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color(0xFF101019)).padding(8.dp)) {
                 Row(Modifier.fillMaxWidth().padding(bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(file.extension.uppercase() + " · " + editorText.count { it == '\\\\n' } .plus(1) + " lines", color = Cyan, style = MaterialTheme.typography.labelSmall)
+                    Text(file.extension.uppercase() + " · " + editorText.count { it == '\\n' } .plus(1) + " lines", color = Cyan, style = MaterialTheme.typography.labelSmall)
                     Spacer(Modifier.weight(1f))
                     Text(if (editorText == originalCode) "Saved" else "Unsaved changes", color = if (editorText == originalCode) Muted else Color(0xFFFFD18A), style = MaterialTheme.typography.labelSmall)
                 }
                 Row(Modifier.weight(1f).fillMaxWidth(), verticalAlignment = Alignment.Top) {
-                    Text((1..editorText.count { it == '\\\\n' }.plus(1)).joinToString("\\\\n"), color = Color(0xFF7E83A4), fontFamily = FontFamily.Monospace, style = TextStyle(fontSize = 12.sp, lineHeight = 19.sp), modifier = Modifier.width(38.dp).fillMaxHeight().verticalScroll(rememberScrollState()).padding(end = 6.dp))
+                    Text((1..editorText.count { it == '\\n' }.plus(1)).joinToString("\\n"), color = Color(0xFF7E83A4), fontFamily = FontFamily.Monospace, style = TextStyle(fontSize = 12.sp, lineHeight = 19.sp), modifier = Modifier.width(38.dp).fillMaxHeight().verticalScroll(rememberScrollState()).padding(end = 6.dp))
                     BasicTextField(value = editorText, onValueChange = { next ->
                         if (next != editorText) { undoStack = (undoStack + editorText).takeLast(100); redoStack = emptyList(); editorText = next }
                     }, modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()), textStyle = TextStyle(color = Color(0xFFEDE7F5), fontFamily = FontFamily.Monospace, fontSize = 12.sp, lineHeight = 19.sp), cursorBrush = androidx.compose.ui.graphics.SolidColor(Cyan))
@@ -235,5 +235,11 @@ if "rememberLazyListState" not in s or "onFullscreenChanged(!fullscreen)" not in
     raise SystemExit("Scroll or fullscreen patch verification failed")
 if "Album artwork" not in s or "Find and replace" not in s or "Replace all" not in s or "originalCode" not in s:
     raise SystemExit("Mini-player or code editor patch verification failed")
+gradle = Path("native-project/app/build.gradle.kts")
+g = gradle.read_text()
+g = g.replace("versionCode = 7", "versionCode = 8").replace('versionName = "1.6"', 'versionName = "1.7"')
+gradle.write_text(g)
+if 'versionName = "1.7"' not in g:
+    raise SystemExit("Version bump failed")
 p.write_text(s)
 print("Applied: true audio-stop visibility, embedded artwork thumbnail, folder scroll restoration, true fullscreen layout, and native code editor tools.")
