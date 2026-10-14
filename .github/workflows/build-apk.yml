@@ -457,6 +457,10 @@ jobs:
         shell: bash
         run: python3 .github/scripts/ui_polish.py
 
+      - name: Upgrade video playback to VLC engine and v1.6
+        shell: bash
+        run: python3 .github/scripts/vlc_video_upgrade.py
+
       - name: Export patched Kotlin source for validation
         uses: actions/upload-artifact@v4
         with:
@@ -470,7 +474,7 @@ jobs:
         shell: bash
         run: gradle -p native-project assembleDebug testDebugUnitTest --stacktrace
 
-      - name: Verify v1.5 APK package
+      - name: Verify v1.6 APK package
         shell: bash
         run: |
           APK="$(find native-project/app/build/outputs/apk/debug -maxdepth 1 -type f -name '*.apk' | head -n 1)"
@@ -478,8 +482,8 @@ jobs:
           unzip -t "$APK"
           AAPT="$ANDROID_HOME/build-tools/35.0.0/aapt"
           "$AAPT" dump badging "$APK" | tee /tmp/velvet-badging.txt
-          grep -q "versionCode='6' versionName='1.5'" /tmp/velvet-badging.txt
-          echo "Verified package versionCode 6 / versionName 1.5."
+          grep -q "versionCode='7' versionName='1.6'" /tmp/velvet-badging.txt
+          echo "Verified package versionCode 7 / versionName 1.6."
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
