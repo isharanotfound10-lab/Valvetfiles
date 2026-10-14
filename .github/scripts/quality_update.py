@@ -28,6 +28,7 @@ rep('''    fun openEntry(entry: FileEntry) {
 s=s.replace('prefs.getBoolean("motion_effects", false)','prefs.getBoolean("motion_effects", true)')
 # Keep media-player ambient motion enabled when the user's motion toggle is on.
 s=s.replace('.animateContentSize(spring(stiffness = 500f))) {','.then(if (MotionEffectsEnabled.value) Modifier.animateContentSize(spring(stiffness = 500f)) else Modifier)) {')
+s=s.replace('animateFloatAsState(if (pressed) .985f else 1f,','animateFloatAsState(if (MotionEffectsEnabled.value && pressed) .985f else 1f,')
 
 # Extra themes.
 needle='    ThemePreset("Champagne Titanium", Color(0xFF100D08), Color(0xFF211B12), Color(0xFF302719), Color(0xB83A3020), Color(0xFFFFD58A), Color(0xFFE8E7E1), Color(0xFFD2C6AB), Color(0x665A4A2D))'
