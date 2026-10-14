@@ -133,12 +133,16 @@ once('''    onNavigate: (File) -> Unit,
     val activity = context as? Activity
     val audioManager = remember { context.getSystemService(Context.AUDIO_SERVICE) as AudioManager }
     val libVlc = remember(file.absolutePath, context) {''', "VLC fullscreen parameters")
-once('    var fullscreen by remember(file.absolutePath) { mutableStateOf(false) }\n',
-     '',
-     "remove duplicate VLC fullscreen state")
-once('IconButton(onClick = { fullscreen = !fullscreen }) { Icon(if (fullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen, "Toggle fullscreen", tint = Color.White) }',
-     'IconButton(onClick = { onFullscreenChanged(!fullscreen) }) { Icon(if (fullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen, "Toggle fullscreen", tint = Color.White) }',
-     "fullscreen button callback")
+vlc_start = s.index("private fun VlcVideoPlayerPanel(")
+vlc_end = s.index("@Composable\nprivate fun VideoPlayerPanel(", vlc_start)
+vlc_block = s[vlc_start:vlc_end]
+vlc_block = vlc_block.replace('    var fullscreen by remember(file.absolutePath) { mutableStateOf(false) }\n', '', 1)
+old_fullscreen_button = 'IconButton(onClick = { fullscreen = !fullscreen }) { Icon(if (fullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen, "Toggle fullscreen", tint = Color.White) }'
+new_fullscreen_button = 'IconButton(onClick = { onFullscreenChanged(!fullscreen) }) { Icon(if (fullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen, "Toggle fullscreen", tint = Color.White) }'
+if old_fullscreen_button not in vlc_block:
+    raise SystemExit("Could not locate fullscreen button inside VLC player")
+vlc_block = vlc_block.replace(old_fullscreen_button, new_fullscreen_button, 1)
+s = s[:vlc_start] + vlc_block + s[vlc_end:]
 
 # Turn source/config text previews into a practical native code editor.
 once('''    val imageMode = isImageFile(file)
