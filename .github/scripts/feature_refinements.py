@@ -68,8 +68,8 @@ new_art = '''Box(Modifier.size(46.dp).clip(RoundedCornerShape(12.dp)).background
                                         else Icon(Icons.Default.Album, null, tint = Cyan, modifier = Modifier.size(27.dp))
                                     }'''
 once(old_art, new_art, "mini-player artwork thumbnail")
-once('IconButton(onClick = { ContextCompat.startForegroundService(context, Intent(context, VelvetAudioService::class.java).setAction(VelvetAudioService.ACTION_STOP)) }) { Icon(Icons.Default.Close, "Stop audio", tint = Muted) }',
-     'IconButton(onClick = { miniAudioPath = null; miniAudioTitle = "Audio player"; miniAudioPlaying = false; miniAudioArtwork = null; ContextCompat.startForegroundService(context, Intent(context, VelvetAudioService::class.java).setAction(VelvetAudioService.ACTION_STOP)) }) { Icon(Icons.Default.Close, "Stop audio and hide player", tint = Muted) }',
+once('IconButton(onClick = { context.stopService(Intent(context, VelvetAudioService::class.java)) }) { Icon(Icons.Default.Close, "Stop audio", tint = Muted) }',
+     'IconButton(onClick = { miniAudioPath = null; miniAudioTitle = "Audio player"; miniAudioPlaying = false; miniAudioArtwork = null; context.stopService(Intent(context, VelvetAudioService::class.java)) }) { Icon(Icons.Default.Close, "Stop audio and hide player", tint = Muted) }',
      "stop button clears mini-player")
 
 once('LazyVerticalGrid(columns = GridCells.Adaptive(145.dp), contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp),',
