@@ -122,12 +122,10 @@ if 'private fun extractZipSafely(' not in s:
 
 private fun openFile(context: Context, file: File) {''','ZIP extraction')
 s=s.replace('private fun isPreviewableFile(file: File): Boolean = isImageFile(file) ||\n    file.extension.lowercase() in setOf("pdf",','private fun isPreviewableFile(file: File): Boolean = isImageFile(file) ||\n    file.extension.lowercase() in setOf("zip", "pdf",')
-rep('''    val pdfMode = file.extension.equals("pdf", true)
-    var page by remember(file.absolutePath) { mutableIntStateOf(0) }''','''    val pdfMode = file.extension.equals("pdf", true)
+rep('    val pdfMode = file.extension.equals("pdf", true)','''    val pdfMode = file.extension.equals("pdf", true)
     val archiveMode = file.extension.equals("zip", true)
     var archiveEntries by remember(file.absolutePath) { mutableStateOf<List<String>>(emptyList()) }
-    var archiveBusy by remember(file.absolutePath) { mutableStateOf(false) }
-    var page by remember(file.absolutePath) { mutableIntStateOf(0) }''','archive state')
+    var archiveBusy by remember(file.absolutePath) { mutableStateOf(false) }''','archive state')
 a=s.index('private fun FilePreviewScreen('); b=s.index('@Composable\nprivate fun VideoGestureMeter',a); block=s[a:b]
 block=block.replace('''                when {
                     imageMode -> {''','''                when {
