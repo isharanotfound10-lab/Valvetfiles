@@ -1,0 +1,239 @@
+from pathlib import Path
+
+p = Path("native-project/app/src/main/java/com/velvetfiles/app/MainActivity.kt")
+s = p.read_text()
+
+def once(old, new, label):
+    global s
+    if new in s:
+        return
+    if old not in s:
+        raise SystemExit("Could not locate " + label + "; refusing to apply partial patch")
+    s = s.replace(old, new, 1)
+
+# Keep both browsing layouts alive while the player temporarily replaces the file list.
+once("import androidx.compose.foundation.lazy.LazyColumn\n",
+     "import androidx.compose.foundation.lazy.LazyColumn\nimport androidx.compose.foundation.lazy.rememberLazyListState\nimport androidx.compose.foundation.lazy.grid.rememberLazyGridState\n",
+     "lazy-list imports")
+once("import androidx.compose.ui.text.font.FontWeight\n",
+     "import androidx.compose.ui.text.font.FontWeight\nimport androidx.compose.ui.text.font.FontFamily\nimport androidx.compose.ui.text.TextStyle\nimport androidx.compose.foundation.text.BasicTextField\n",
+     "code-editor imports")
+once('    var refreshKey by remember { mutableIntStateOf(0) }\n',
+     '    var refreshKey by remember { mutableIntStateOf(0) }\n    val browseListState = rememberLazyListState()\n    val browseGridState = rememberLazyGridState()\n    var miniAudioArtwork by remember { mutableStateOf<Bitmap?>(null) }\n',
+     "persistent browsing state")
+once('    LaunchedEffect(themeName, customAccentArgb) {\n',
+     '''    LaunchedEffect(miniAudioPath) {
+        miniAudioArtwork = withContext(Dispatchers.IO) {
+            val path = miniAudioPath
+            if (path.isNullOrBlank() || !File(path).isFile) null else {
+                val retriever = MediaMetadataRetriever()
+                try {
+                    retriever.setDataSource(path)
+                    val bytes = retriever.embeddedPicture
+                    if (bytes == null) null else {
+                        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                        BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
+                        var sample = 1
+                        while (bounds.outWidth / sample > 640 || bounds.outHeight / sample > 640) sample *= 2
+                        BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = sample })
+                    }
+                } catch (_: Exception) { null } finally { try { retriever.release() } catch (_: Exception) {} }
+            }
+        }
+    }
+    LaunchedEffect(currentFolder.absolutePath) {
+        browseListState.scrollToItem(0)
+        browseGridState.scrollToItem(0)
+    }
+    LaunchedEffect(themeName, customAccentArgb) {
+''',
+     "artwork loading and folder-only scroll reset")
+
+# Accept a null path from the audio service as a real stop event, not stale metadata.
+once('                if (!path.isNullOrBlank()) miniAudioPath = path\n',
+     '                if (intent.hasExtra(VelvetAudioService.EXTRA_PATH)) miniAudioPath = path?.takeIf { it.isNotBlank() }\n',
+     "audio stop-state receiver")
+once('if (!miniAudioPath.isNullOrBlank() && File(miniAudioPath!!).isFile) {',
+     'if (!miniAudioPath.isNullOrBlank() && File(miniAudioPath!!).isFile) {',
+     "mini-player visibility anchor")
+
+old_art = 'Box(Modifier.size(42.dp).clip(RoundedCornerShape(12.dp)).background(Brush.radialGradient(listOf(Purple.copy(alpha = .65f), Glass, Ink))), contentAlignment = Alignment.Center) { Icon(Icons.Default.MusicNote, null, tint = Cyan) }'
+new_art = '''Box(Modifier.size(46.dp).clip(RoundedCornerShape(12.dp)).background(Brush.radialGradient(listOf(Purple.copy(alpha = .65f), Glass, Ink))), contentAlignment = Alignment.Center) {
+                                        val cover = miniAudioArtwork
+                                        if (cover != null) Image(bitmap = cover.asImageBitmap(), contentDescription = "Album artwork", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                        else Icon(Icons.Default.Album, null, tint = Cyan, modifier = Modifier.size(27.dp))
+                                    }'''
+once(old_art, new_art, "mini-player artwork thumbnail")
+once('IconButton(onClick = { ContextCompat.startForegroundService(context, Intent(context, VelvetAudioService::class.java).setAction(VelvetAudioService.ACTION_STOP)) }) { Icon(Icons.Default.Close, "Stop audio", tint = Muted) }',
+     'IconButton(onClick = { miniAudioPath = null; miniAudioTitle = "Audio player"; miniAudioPlaying = false; miniAudioArtwork = null; ContextCompat.startForegroundService(context, Intent(context, VelvetAudioService::class.java).setAction(VelvetAudioService.ACTION_STOP)) }) { Icon(Icons.Default.Close, "Stop audio and hide player", tint = Muted) }',
+     "stop button clears mini-player")
+
+once('LazyVerticalGrid(columns = GridCells.Adaptive(145.dp), contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp),',
+     'LazyVerticalGrid(state = browseGridState, columns = GridCells.Adaptive(145.dp), contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp),',
+     "grid scroll state")
+once('LazyColumn(verticalArrangement = Arrangement.spacedBy(FileListSpacing.floatValue.dp), contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp)) {',
+     'LazyColumn(state = browseListState, verticalArrangement = Arrangement.spacedBy(FileListSpacing.floatValue.dp), contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp)) {',
+     "list scroll state")
+
+# Make fullscreen affect the parent layout, not only Android's system bars.
+once('''    val video = isVideoFile(file)
+    Column(modifier.fillMaxSize().liquidBackdrop(animate = true).padding(horizontal = 14.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 7.dp)) {
+''',
+'''    val video = isVideoFile(file)
+    var videoFullscreen by remember(file.absolutePath) { mutableStateOf(false) }
+    Column(modifier.fillMaxSize().then(if (videoFullscreen) Modifier.background(Color.Black) else Modifier.liquidBackdrop(animate = true).padding(horizontal = 14.dp))) {
+        if (!videoFullscreen) Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 7.dp)) {
+''', "media-player fullscreen parent layout")
+once('''            VlcVideoPlayerPanel(file, queue.filter { isVideoFile(it) }, Modifier.weight(1f).fillMaxWidth(), onNavigate, onVideoProgress)
+            Spacer(Modifier.height(8.dp))
+            GlassPanel(animate = false) {
+                Text(file.name, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text("\${file.extension.uppercase()} · \${humanSize(file.length())} · " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(file.lastModified())), color = Muted, style = MaterialTheme.typography.bodySmall)
+            }
+''',
+'''            VlcVideoPlayerPanel(file, queue.filter { isVideoFile(it) }, Modifier.weight(1f).fillMaxWidth(), onNavigate, onVideoProgress, videoFullscreen, { videoFullscreen = it })
+            if (!videoFullscreen) {
+                Spacer(Modifier.height(8.dp))
+                GlassPanel(animate = false) {
+                    Text(file.name, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text("\${file.extension.uppercase()} · \${humanSize(file.length())} · " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(file.lastModified())), color = Muted, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+''', "VLC player fullscreen callback")
+once('''        Spacer(Modifier.height(8.dp))
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun VlcVideoPlayerPanel(''',
+'''        if (!videoFullscreen) Spacer(Modifier.height(8.dp))
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun VlcVideoPlayerPanel(''', "fullscreen bottom spacing")
+once('''    onNavigate: (File) -> Unit,
+    onPosition: (String, Int, Int) -> Unit
+) {
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("file_manager_preferences", Context.MODE_PRIVATE) }
+    val activity = context as? Activity
+    val audioManager = remember { context.getSystemService(Context.AUDIO_SERVICE) as AudioManager }
+    val libVlc = remember(file.absolutePath, context) {''',
+'''    onNavigate: (File) -> Unit,
+    onPosition: (String, Int, Int) -> Unit,
+    fullscreen: Boolean,
+    onFullscreenChanged: (Boolean) -> Unit
+) {
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("file_manager_preferences", Context.MODE_PRIVATE) }
+    val activity = context as? Activity
+    val audioManager = remember { context.getSystemService(Context.AUDIO_SERVICE) as AudioManager }
+    val libVlc = remember(file.absolutePath, context) {''', "VLC fullscreen parameters")
+once('    var fullscreen by remember(file.absolutePath) { mutableStateOf(false) }\n',
+     '',
+     "remove duplicate VLC fullscreen state")
+once('IconButton(onClick = { fullscreen = !fullscreen }) { Icon(if (fullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen, "Toggle fullscreen", tint = Color.White) }',
+     'IconButton(onClick = { onFullscreenChanged(!fullscreen) }) { Icon(if (fullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen, "Toggle fullscreen", tint = Color.White) }',
+     "fullscreen button callback")
+
+# Turn source/config text previews into a practical native code editor.
+once('''    val imageMode = isImageFile(file)
+    val pdfMode = file.extension.equals("pdf", true)
+    var page by remember(file.absolutePath) { mutableIntStateOf(0) }
+''',
+'''    val imageMode = isImageFile(file)
+    val pdfMode = file.extension.equals("pdf", true)
+    val codeMode = file.extension.lowercase() in setOf("kt", "kts", "java", "py", "js", "ts", "jsx", "tsx", "json", "xml", "html", "htm", "css", "scss", "sql", "sh", "bash", "yml", "yaml", "toml", "ini", "properties", "gradle", "c", "h", "cpp", "hpp", "rs", "go", "php", "rb", "swift", "dart", "md")
+    var editingCode by remember(file.absolutePath) { mutableStateOf(false) }
+    var editorText by remember(file.absolutePath) { mutableStateOf("") }
+    var originalCode by remember(file.absolutePath) { mutableStateOf("") }
+    var undoStack by remember(file.absolutePath) { mutableStateOf(listOf<String>()) }
+    var redoStack by remember(file.absolutePath) { mutableStateOf(listOf<String>()) }
+    var showFindReplace by remember(file.absolutePath) { mutableStateOf(false) }
+    var findText by remember(file.absolutePath) { mutableStateOf("") }
+    var replaceText by remember(file.absolutePath) { mutableStateOf("") }
+    var page by remember(file.absolutePath) { mutableIntStateOf(0) }
+''', "code editor state")
+once('''        bitmap = loaded.bitmap; text = loaded.text; pageCount = loaded.pageCount; error = loaded.error
+        scale = 1f; rotation = 0f
+''',
+'''        bitmap = loaded.bitmap; text = loaded.text; pageCount = loaded.pageCount; error = loaded.error
+        if (codeMode && loaded.text != null) {
+            editorText = loaded.text
+            originalCode = loaded.text
+            undoStack = emptyList(); redoStack = emptyList(); editingCode = false
+        }
+        scale = 1f; rotation = 0f
+''', "initialize code editor")
+once('''            IconButton(onClick = { shareFile(context, file) }) { Icon(Icons.Default.Share, "Share file", tint = Purple) }
+        }
+        when {
+''',
+'''            if (codeMode && text != null) {
+                if (editingCode) {
+                    IconButton(onClick = { if (undoStack.isNotEmpty()) { redoStack = redoStack + editorText; editorText = undoStack.last(); undoStack = undoStack.dropLast(1) } }, enabled = undoStack.isNotEmpty()) { Icon(Icons.Default.Undo, "Undo", tint = Purple) }
+                    IconButton(onClick = { if (redoStack.isNotEmpty()) { undoStack = undoStack + editorText; editorText = redoStack.last(); redoStack = redoStack.dropLast(1) } }, enabled = redoStack.isNotEmpty()) { Icon(Icons.Default.Redo, "Redo", tint = Purple) }
+                    IconButton(onClick = { showFindReplace = !showFindReplace }) { Icon(Icons.Default.FindReplace, "Find and replace", tint = Purple) }
+                    TextButton(onClick = {
+                        scope.launch {
+                            val failure = withContext(Dispatchers.IO) { runCatching { file.writeText(editorText, Charsets.UTF_8) }.exceptionOrNull() }
+                            if (failure == null) {
+                                originalCode = editorText; text = editorText; editingCode = false
+                                Toast.makeText(context, "Saved \${file.name}", Toast.LENGTH_SHORT).show()
+                            } else Toast.makeText(context, "Save failed: \${failure.message}", Toast.LENGTH_LONG).show()
+                        }
+                    }) { Text("Save", color = if (editorText != originalCode) Color(0xFF9FFFD2) else Purple) }
+                } else {
+                    IconButton(onClick = { editorText = text.orEmpty(); originalCode = text.orEmpty(); undoStack = emptyList(); redoStack = emptyList(); editingCode = true }) { Icon(Icons.Default.Code, "Edit source code", tint = Purple) }
+                }
+            }
+            IconButton(onClick = { shareFile(context, file) }) { Icon(Icons.Default.Share, "Share file", tint = Purple) }
+        }
+        if (editingCode && showFindReplace) {
+            Column(Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+                OutlinedTextField(value = findText, onValueChange = { findText = it }, modifier = Modifier.fillMaxWidth(), singleLine = true, label = { Text("Find") })
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedTextField(value = replaceText, onValueChange = { replaceText = it }, modifier = Modifier.weight(1f), singleLine = true, label = { Text("Replace with") })
+                    TextButton(onClick = {
+                        if (findText.isNotEmpty() && editorText.contains(findText)) {
+                            undoStack = (undoStack + editorText).takeLast(100); redoStack = emptyList()
+                            editorText = editorText.replace(findText, replaceText)
+                        }
+                    }) { Text("Replace all", color = Purple) }
+                }
+            }
+        }
+        when {
+''', "editor toolbar and find/replace")
+once('''            text != null -> androidx.compose.foundation.text.selection.SelectionContainer {
+                Text(text!!, color = Color(0xFFEDE7F5), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(12.dp))
+            }
+''',
+'''            text != null && editingCode -> Column(Modifier.weight(1f).fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color(0xFF101019)).padding(8.dp)) {
+                Row(Modifier.fillMaxWidth().padding(bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(file.extension.uppercase() + " · " + editorText.count { it == '\\\\n' } .plus(1) + " lines", color = Cyan, style = MaterialTheme.typography.labelSmall)
+                    Spacer(Modifier.weight(1f))
+                    Text(if (editorText == originalCode) "Saved" else "Unsaved changes", color = if (editorText == originalCode) Muted else Color(0xFFFFD18A), style = MaterialTheme.typography.labelSmall)
+                }
+                Row(Modifier.weight(1f).fillMaxWidth(), verticalAlignment = Alignment.Top) {
+                    Text((1..editorText.count { it == '\\\\n' }.plus(1)).joinToString("\\\\n"), color = Color(0xFF7E83A4), fontFamily = FontFamily.Monospace, style = TextStyle(fontSize = 12.sp, lineHeight = 19.sp), modifier = Modifier.width(38.dp).fillMaxHeight().verticalScroll(rememberScrollState()).padding(end = 6.dp))
+                    BasicTextField(value = editorText, onValueChange = { next ->
+                        if (next != editorText) { undoStack = (undoStack + editorText).takeLast(100); redoStack = emptyList(); editorText = next }
+                    }, modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()), textStyle = TextStyle(color = Color(0xFFEDE7F5), fontFamily = FontFamily.Monospace, fontSize = 12.sp, lineHeight = 19.sp), cursorBrush = androidx.compose.ui.graphics.SolidColor(Cyan))
+                }
+            }
+            text != null -> androidx.compose.foundation.text.selection.SelectionContainer {
+                Text(text!!, color = Color(0xFFEDE7F5), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(12.dp))
+            }
+''', "editable code pane")
+# Update helper caption and confirm all key features survived transformation.
+if "rememberLazyListState" not in s or "onFullscreenChanged(!fullscreen)" not in s:
+    raise SystemExit("Scroll or fullscreen patch verification failed")
+if "Album artwork" not in s or "Find and replace" not in s or "Replace all" not in s or "originalCode" not in s:
+    raise SystemExit("Mini-player or code editor patch verification failed")
+p.write_text(s)
+print("Applied: true audio-stop visibility, embedded artwork thumbnail, folder scroll restoration, true fullscreen layout, and native code editor tools.")
