@@ -175,6 +175,37 @@ rep('''        context.startActivity(Intent(Intent.ACTION_VIEW).apply {
         }
         context.startActivity(Intent.createChooser(intent, "Open file with"))''','open with chooser')
 
+
+# Add visible, low-cost screen transitions (not just tiny press-scale feedback).
+if 'import androidx.compose.animation.AnimatedVisibility' not in s:
+    rep('import androidx.compose.animation.animateContentSize\n',
+        'import androidx.compose.animation.animateContentSize\nimport androidx.compose.animation.AnimatedVisibility\nimport androidx.compose.animation.fadeIn\nimport androidx.compose.animation.slideInHorizontally\nimport androidx.compose.animation.scaleIn\nimport androidx.compose.animation.EnterTransition\n',
+        'screen transition imports')
+rep('''        ) { scaffoldPadding ->
+            if (!hasStorageAccess) {''',
+'''        ) { scaffoldPadding ->
+            key(if (!hasStorageAccess) "permission" else previewFile?.absolutePath?.let { "preview:$it" } ?: playerFile?.absolutePath?.let { "player:$it" } ?: if (screen == "browse") "browse:\${currentFolder.absolutePath}" else screen) {
+                AnimatedVisibility(
+                    visible = true,
+                    enter = if (motionEnabled) fadeIn(animationSpec = tween(190)) + slideInHorizontally(initialOffsetX = { it / 18 }, animationSpec = tween(230)) + scaleIn(initialScale = .985f, animationSpec = tween(230)) else EnterTransition.None,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+            if (!hasStorageAccess) {''',
+'screen transition wrapper')
+rep('''            }
+        }
+
+        if (actionDialog && selected != null) {''',
+'''            }
+                }
+            }
+        }
+
+        if (actionDialog && selected != null) {''',
+'screen transition wrapper close')
+s=s.replace('''Column(modifier.fillMaxWidth().liquidGlassSurface(RoundedCornerShape(24.dp), animate).padding(15.dp), content = content)''',
+'''Column(modifier.fillMaxWidth().then(if (animate && MotionEffectsEnabled.value) Modifier.animateContentSize(animationSpec = spring(stiffness = 420f, dampingRatio = .86f)) else Modifier).liquidGlassSurface(RoundedCornerShape(24.dp), animate).padding(15.dp), content = content)''')
+
 g=Path("native-project/app/build.gradle.kts")
 v=g.read_text().replace('versionCode = 8','versionCode = 9').replace('versionName = "1.7"','versionName = "1.8"')
 if 'versionName = "1.8"' not in v: raise SystemExit("Expected v1.7 source before version bump")
