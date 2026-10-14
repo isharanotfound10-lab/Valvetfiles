@@ -63,7 +63,7 @@ once('if (!miniAudioPath.isNullOrBlank() && File(miniAudioPath!!).isFile) {',
      "hide mini-player unless audio is actively playing")
 
 # Add a swipe-down collapse affordance to the mini audio player.
-if "miniAudioCollapsed" not in s[s.index("if (miniAudioPlaying && !miniAudioPath"):s.index("old_art =")]:
+if "miniAudioCollapsed" not in s[s.index("if (miniAudioPlaying && !miniAudioPath"):s.index("LazyVerticalGrid", s.index("if (miniAudioPlaying && !miniAudioPath"))]:
     player_start = s.index("if (miniAudioPlaying && !miniAudioPath.isNullOrBlank() && File(miniAudioPath!!).isFile) {")
     panel_start = s.index("GlassPanel {", player_start)
     # Find the end of this GlassPanel content block with a simple Kotlin brace scan.
