@@ -68,9 +68,13 @@ new_art = '''Box(Modifier.size(46.dp).clip(RoundedCornerShape(12.dp)).background
                                         else Icon(Icons.Default.Album, null, tint = Cyan, modifier = Modifier.size(27.dp))
                                     }'''
 once(old_art, new_art, "mini-player artwork thumbnail")
-once('IconButton(onClick = { context.stopService(Intent(context, VelvetAudioService::class.java)) }) { Icon(Icons.Default.Close, "Stop audio", tint = Muted) }',
-     'IconButton(onClick = { miniAudioPath = null; miniAudioTitle = "Audio player"; miniAudioPlaying = false; miniAudioArtwork = null; context.stopService(Intent(context, VelvetAudioService::class.java)) }) { Icon(Icons.Default.Close, "Stop audio and hide player", tint = Muted) }',
-     "stop button clears mini-player")
+stop_button_old = 'IconButton(onClick = { context.stopService(Intent(context, VelvetAudioService::class.java)) }) { Icon(Icons.Default.Close, "Stop audio", tint = Muted) }'
+stop_button_new = 'IconButton(onClick = { miniAudioPath = null; miniAudioTitle = "Audio player"; miniAudioPlaying = false; miniAudioArtwork = null; context.stopService(Intent(context, VelvetAudioService::class.java)) }) { Icon(Icons.Default.Close, "Stop audio and hide player", tint = Muted) }'
+if stop_button_new not in s:
+    if stop_button_old in s:
+        s = s.replace(stop_button_old, stop_button_new, 1)
+    else:
+        print("Stop-button cleanup anchor differs in this player version; skipping optional mini-player rewrite.")
 
 once('LazyVerticalGrid(columns = GridCells.Adaptive(145.dp), contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp),',
      'LazyVerticalGrid(state = browseGridState, columns = GridCells.Adaptive(145.dp), contentPadding = PaddingValues(top = 8.dp, bottom = 90.dp),',
