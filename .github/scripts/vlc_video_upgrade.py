@@ -5,7 +5,7 @@ gradle = root / "build.gradle.kts"
 source = root / "src/main/java/com/velvetfiles/app/MainActivity.kt"
 
 g = gradle.read_text()
-dep = '    implementation("org.videolan.android:libvlc-all:3.7.7")'
+dep = '    implementation("org.videolan.android:libvlc-all:3.6.5")'
 if dep not in g:
     if "dependencies {\n" not in g:
         raise SystemExit("Could not locate app dependencies block")
@@ -280,7 +280,7 @@ private fun VlcVideoPlayerPanel(
 '''
     s = s.replace(marker, component + marker, 1)
 
-if 'private fun VlcVideoPlayerPanel(' not in s or 'org.videolan.android:libvlc-all:3.7.7' not in gradle.read_text():
+if 'private fun VlcVideoPlayerPanel(' not in s or 'org.videolan.android:libvlc-all:3.6.5' not in gradle.read_text():
     raise SystemExit("VLC player patch verification failed")
 source.write_text(s)
 print("Added VLC-powered playback and upgraded app to v1.6.")
