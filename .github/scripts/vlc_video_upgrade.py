@@ -70,7 +70,7 @@ private fun VlcVideoPlayerPanel(
         androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
     ) { uri ->
         if (uri != null) {
-            val added = runCatching { player.addSlave(org.videolan.libvlc.Media.Slave.Type.Subtitle, uri, true) }.getOrDefault(false)
+            val added = runCatching { player.addSlave(0, uri, true) }.getOrDefault(false)
             message = if (added) "External subtitle added" else "Couldn't load that subtitle"
         }
     }
@@ -233,7 +233,7 @@ private fun VlcVideoPlayerPanel(
                         TextButton(onClick = { menu = if (menu == "subtitle") "" else "subtitle" }) { Icon(Icons.Default.Subtitles, null, tint = Color.White); Text("Subs", color = Color.White) }
                         DropdownMenu(expanded = menu == "subtitle", onDismissRequest = { menu = "" }, containerColor = PanelLight) {
                             DropdownMenuItem(text = { Text("Subtitles off", color = Color.White) }, onClick = { runCatching { player.setSpuTrack(-1) }; menu = "" })
-                            subtitleTracks.forEach { track -> DropdownMenuItem(text = { Text(track.second, color = Color.White) }, onClick = { runCatching { player.selectSpuTrack(track.first) }; menu = "" }) }
+                            subtitleTracks.forEach { track -> DropdownMenuItem(text = { Text(track.second, color = Color.White) }, onClick = { runCatching { player.setSpuTrack(track.first) }; menu = "" }) }
                             DropdownMenuItem(text = { Text("Load external subtitle…", color = Color.White) }, onClick = { menu = ""; subtitlePicker.launch(arrayOf("text/*", "application/octet-stream")) })
                             DropdownMenuItem(text = { Text("Subtitle delay −50 ms", color = Color.White) }, onClick = { subtitleDelayMs -= 50; runCatching { player.setSpuDelay(subtitleDelayMs * 1000L) }; menu = "" })
                             DropdownMenuItem(text = { Text("Subtitle delay +50 ms", color = Color.White) }, onClick = { subtitleDelayMs += 50; runCatching { player.setSpuDelay(subtitleDelayMs * 1000L) }; menu = "" })
@@ -242,7 +242,7 @@ private fun VlcVideoPlayerPanel(
                     Box {
                         TextButton(onClick = { menu = if (menu == "audio") "" else "audio" }) { Icon(Icons.Default.Audiotrack, null, tint = Color.White); Text("Audio", color = Color.White) }
                         DropdownMenu(expanded = menu == "audio", onDismissRequest = { menu = "" }, containerColor = PanelLight) {
-                            audioTracks.forEach { track -> DropdownMenuItem(text = { Text(track.second, color = Color.White) }, onClick = { runCatching { player.selectAudioTrack(track.first) }; menu = "" }) }
+                            audioTracks.forEach { track -> DropdownMenuItem(text = { Text(track.second, color = Color.White) }, onClick = { runCatching { player.setAudioTrack(track.first) }; menu = "" }) }
                             DropdownMenuItem(text = { Text("Audio delay −50 ms", color = Color.White) }, onClick = { audioDelayMs -= 50; runCatching { player.setAudioDelay(audioDelayMs * 1000L) }; menu = "" })
                             DropdownMenuItem(text = { Text("Audio delay +50 ms", color = Color.White) }, onClick = { audioDelayMs += 50; runCatching { player.setAudioDelay(audioDelayMs * 1000L) }; menu = "" })
                         }
