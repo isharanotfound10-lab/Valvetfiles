@@ -25,9 +25,9 @@ rep('''    fun openEntry(entry: FileEntry) {
                 miniAudioPlaying = false
                 context.stopService(Intent(context, VelvetAudioService::class.java))
             }''',"exclusive playback")
-s=s.replace('prefs.getBoolean("motion_effects", true)','prefs.getBoolean("motion_effects", false)')
-s=s.replace('Column(modifier.fillMaxSize().liquidBackdrop(animate = true).padding(horizontal = 14.dp))','Column(modifier.fillMaxSize().liquidBackdrop(animate = false).padding(horizontal = 14.dp))')
-s=s.replace('.animateContentSize(spring(stiffness = 500f))) {',') {')
+s=s.replace('prefs.getBoolean("motion_effects", false)','prefs.getBoolean("motion_effects", true)')
+# Keep media-player ambient motion enabled when the user's motion toggle is on.
+# Preserve spring-based content-size transitions instead of stripping them.
 
 # Extra themes.
 needle='    ThemePreset("Champagne Titanium", Color(0xFF100D08), Color(0xFF211B12), Color(0xFF302719), Color(0xB83A3020), Color(0xFFFFD58A), Color(0xFFE8E7E1), Color(0xFFD2C6AB), Color(0x665A4A2D))'
