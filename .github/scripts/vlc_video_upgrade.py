@@ -43,7 +43,7 @@ private fun VlcVideoPlayerPanel(
     val audioManager = remember { context.getSystemService(Context.AUDIO_SERVICE) as AudioManager }
     val libVlc = remember(file.absolutePath, context) {
         org.videolan.libvlc.LibVLC(context, arrayListOf(
-            "--audio-time-stretch", "--avcodec-hw=any", "--network-caching=1200",
+            "--audio-time-stretch", "--avcodec-hw=none", "--network-caching=1200",
             "--file-caching=400", "--sub-autodetect-file", "--no-video-title-show",
             "--drop-late-frames", "--skip-frames"
         ))
