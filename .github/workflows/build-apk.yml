@@ -453,6 +453,10 @@ jobs:
               print(f"{i+1}: {lines[i]}")
           PY
 
+      - name: Polish UI motion and natural filename sorting
+        shell: bash
+        run: python3 .github/scripts/ui_polish.py
+
       - name: Export patched Kotlin source for validation
         uses: actions/upload-artifact@v4
         with:
