@@ -10,6 +10,7 @@ on:
       - ".github/scripts/v14_patch_part*.txt"
       - ".github/scripts/v15_patch.txt"
       - ".github/scripts/vlc_video_upgrade.py"
+      - ".github/scripts/feature_refinements.py"
       - ".github/workflows/build-apk.yml"
 
 permissions:
@@ -462,6 +463,10 @@ jobs:
         shell: bash
         run: python3 .github/scripts/vlc_video_upgrade.py
 
+      - name: Refine playback UX and add advanced code editor
+        shell: bash
+        run: python3 .github/scripts/feature_refinements.py
+
       - name: Export patched Kotlin source for validation
         uses: actions/upload-artifact@v4
         with:
@@ -475,7 +480,7 @@ jobs:
         shell: bash
         run: gradle -p native-project assembleDebug testDebugUnitTest --stacktrace
 
-      - name: Verify v1.6 APK package
+      - name: Verify v1.7 APK package
         shell: bash
         run: |
           APK="$(find native-project/app/build/outputs/apk/debug -maxdepth 1 -type f -name '*.apk' | head -n 1)"
@@ -483,8 +488,8 @@ jobs:
           unzip -t "$APK"
           AAPT="$ANDROID_HOME/build-tools/35.0.0/aapt"
           "$AAPT" dump badging "$APK" | tee /tmp/velvet-badging.txt
-          grep -q "versionCode='7' versionName='1.6'" /tmp/velvet-badging.txt
-          echo "Verified package versionCode 7 / versionName 1.6."
+          grep -q "versionCode='8' versionName='1.7'" /tmp/velvet-badging.txt
+          echo "Verified package versionCode 8 / versionName 1.7."
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
