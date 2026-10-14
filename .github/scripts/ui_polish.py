@@ -82,7 +82,7 @@ if tile_start >= 0 and tile_end > tile_start:
     tile = s[tile_start:tile_end]
     tile = tile.replace(
         "combinedClickable(onClick = onClick, onLongClick = onLongClick)) {",
-        "combinedClickable(onClick = onClick, onLongClick = onLongClick).animateContentSize()) {"
+        "combinedClickable(onClick = onClick, onLongClick = onLongClick).then(if (MotionEffectsEnabled.value) Modifier.animateContentSize() else Modifier)) {"
     )
     s = s[:tile_start] + tile + s[tile_end:]
 
