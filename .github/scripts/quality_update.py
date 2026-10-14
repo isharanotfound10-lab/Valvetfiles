@@ -23,7 +23,7 @@ rep('''    fun openEntry(entry: FileEntry) {
         } else if (isVideoFile(entry.file) || isAudioFile(entry.file)) {
             if (isVideoFile(entry.file)) {
                 miniAudioPlaying = false
-                ContextCompat.startForegroundService(context, Intent(context, VelvetAudioService::class.java).setAction(VelvetAudioService.ACTION_STOP))
+                context.stopService(Intent(context, VelvetAudioService::class.java))
             }''',"exclusive playback")
 s=s.replace('prefs.getBoolean("motion_effects", true)','prefs.getBoolean("motion_effects", false)')
 s=s.replace('Column(modifier.fillMaxSize().liquidBackdrop(animate = true).padding(horizontal = 14.dp))','Column(modifier.fillMaxSize().liquidBackdrop(animate = false).padding(horizontal = 14.dp))')
