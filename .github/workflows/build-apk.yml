@@ -9,6 +9,7 @@ on:
       - "**/*.zip"
       - ".github/scripts/v14_patch_part*.txt"
       - ".github/scripts/v15_patch.txt"
+      - ".github/scripts/vlc_video_upgrade.py"
       - ".github/workflows/build-apk.yml"
 
 permissions:
