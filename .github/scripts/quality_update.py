@@ -27,7 +27,7 @@ rep('''    fun openEntry(entry: FileEntry) {
             }''',"exclusive playback")
 s=s.replace('prefs.getBoolean("motion_effects", false)','prefs.getBoolean("motion_effects", true)')
 # Keep media-player ambient motion enabled when the user's motion toggle is on.
-# Preserve spring-based content-size transitions instead of stripping them.
+s=s.replace('.animateContentSize(spring(stiffness = 500f))) {','.then(if (MotionEffectsEnabled.value) Modifier.animateContentSize(spring(stiffness = 500f)) else Modifier)) {')
 
 # Extra themes.
 needle='    ThemePreset("Champagne Titanium", Color(0xFF100D08), Color(0xFF211B12), Color(0xFF302719), Color(0xB83A3020), Color(0xFFFFD58A), Color(0xFFE8E7E1), Color(0xFFD2C6AB), Color(0x665A4A2D))'
@@ -51,8 +51,11 @@ s=s.replace('listOf("Neon Glass", "Minimal Mono", "Classic")','listOf("Neon Glas
 
 # Persistent whole-interface mode changes shared glass surfaces and backgrounds.
 if 'private val UiStyleState' not in s:
- rep('private val FileIconStyle = mutableStateOf("Neon Glass")','private val FileIconStyle = mutableStateOf("Neon Glass")\nprivate val UiStyleState = mutableStateOf("Liquid Glass")','global style state')
+ rep('private val FileIconStyle = mutableStateOf("Neon Glass")','private val FileIconStyle = mutableStateOf("Neon Glass")\nprivate val UiStyleState = mutableStateOf("Liquid Glass")\nprivate val MotionEffectsEnabled = mutableStateOf(true)','global style state')
+elif 'private val MotionEffectsEnabled' not in s:
+ rep('private val UiStyleState = mutableStateOf("Liquid Glass")','private val UiStyleState = mutableStateOf("Liquid Glass")\nprivate val MotionEffectsEnabled = mutableStateOf(true)','global motion state')
 rep('    var iconStyle by remember { mutableStateOf(prefs.getString("icon_style", "Neon Glass") ?: "Neon Glass") }','    var iconStyle by remember { mutableStateOf(prefs.getString("icon_style", "Neon Glass") ?: "Neon Glass") }\n    var uiStyle by remember { mutableStateOf(prefs.getString("ui_style", "Liquid Glass") ?: "Liquid Glass") }','UI style preference')
+rep('    var motionEnabled by remember { mutableStateOf(prefs.getBoolean("motion_effects", true)) }','    var motionEnabled by remember { mutableStateOf(prefs.getBoolean("motion_effects", true)) }\n    LaunchedEffect(motionEnabled) { MotionEffectsEnabled.value = motionEnabled }','global motion toggle sync')
 rep('    LaunchedEffect(iconStyle) { FileIconStyle.value = iconStyle }','    LaunchedEffect(iconStyle) { FileIconStyle.value = iconStyle }\n    LaunchedEffect(uiStyle) { UiStyleState.value = uiStyle }','UI style sync')
 rep('''                    currentTheme = themeName,
                     onThemeSelected = { chooseTheme(it) },
