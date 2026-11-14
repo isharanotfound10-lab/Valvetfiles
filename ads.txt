@@ -1,4 +1,348 @@
-<html><head><style>@charset "UTF-8";
+<html><head><style>.pl-1a07bf653e9b175030ac66b6a1052465__message__desc img {
+    width: 8%;
+    vertical-align: middle;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__finlink {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    position: relative;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__img {
+    width: 55px;
+    height: 55px;
+    border-radius: 15px;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__over {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    right: 0;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__right p {
+    margin: 0;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__link {
+    text-decoration: none;
+    color: #1275ec;
+    border: 0;
+    outline: none;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__link:focus {
+    outline: none;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__content {
+    display: inline-block;
+    vertical-align: top;
+    position: fixed;
+    top: 7%;
+    left: 0;
+    right: 0;
+    margin: auto;
+    padding: 0;
+    width: 95%;
+    max-width: 400px;
+    height: auto;
+    font-size: 13px;
+    text-align: left;
+    border-radius: 10px;
+    background: #5bd068;
+    white-space: normal;
+    z-index: 3;
+    color: #000;
+    text-align: center;
+    display: none;
+    box-shadow: 0 0 7px 0px #6d6d6d;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__message_content {
+    width: 100%;
+    overflow: hidden;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__content .pl-1a07bf653e9b175030ac66b6a1052465__message {
+    padding: 0 20px 0px 20px;
+    line-height: 17px;
+    display: -webkit-flex;
+    display: -ms-flex;
+    display: flex;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__message .pl-1a07bf653e9b175030ac66b6a1052465__message img {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__buttons {
+    display: -webkit-flex;
+    display: -ms-flex;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    line-height: 17px;
+    padding: 0 20px;
+    padding-top: 5px;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__buttons a {
+    color: #2bd64c;
+    font-weight: 600;
+    font-size: 15px;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__buttons a.pl-1a07bf653e9b175030ac66b6a1052465__closelink {
+    color: #b1b1b1;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__content .pl-1a07bf653e9b175030ac66b6a1052465__action {
+    border-top: 1px solid rgb(153, 153, 153);
+    text-align: center;
+    color: #1275ec;
+    font-weight: 700;
+    font-size: 18px;
+    padding: 23px 0;
+    display: block;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__content .pl-1a07bf653e9b175030ac66b6a1052465__content-wrap {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__closelink {
+    position: absolute;
+    right: 0;
+    width: 40px;
+    height: 40px;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__close {
+    position: absolute;
+    top: 6px;
+    right: 12px;
+    width: 10px;
+    height: 13px;
+    cursor: pointer;
+    z-index: 999;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__wrap {
+    position: relative;
+    width: auto;
+    height: 100%;
+    min-height: 100%;
+    font-size: 0;
+    line-height: 0;
+    text-align: center;
+    white-space: nowrap;
+    font-family: "Roboto", sans-serif;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__bg {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    z-index: 1;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__fade {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: auto;
+    background-color: #000;
+    opacity: 0.2;
+    z-index: 2;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__helper {
+    display: inline-block;
+    vertical-align: middle;
+    width: 0;
+    height: 100%;
+    font-size: 0;
+    line-height: 0;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__rtl .pl-1a07bf653e9b175030ac66b6a1052465__content {
+    text-align: right;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__sep {
+    margin: 0 20px;
+    color: #888;
+    font-size: 22px;
+}
+@media screen and (orientation: portrait) {
+    .pl-1a07bf653e9b175030ac66b6a1052465__bg {
+        width: auto;
+        height: 100%;
+    }
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__header__content {
+    align-items: center;
+    padding: 0 0 0 15px;
+    color: rgb(109, 107, 107);
+    box-sizing: border-box;
+    width: 55%;
+    overflow: hidden;
+    margin-right: 2%;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__right {
+    position: absolute;
+    right: -27%;
+    font-size: 13px;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__title {
+    color: #fff;
+    font-weight: 900;
+    font-size: 14px;
+    line-height: 17px;
+    text-transform: uppercase;
+    -webkit-line-clamp: 2;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    text-align: left;
+    min-height: 15px;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__name__abonem {
+    font-size: 16px;
+    font-weight: 800;
+    color: #181617;
+    margin: 0;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__message__desc {
+    font-size: 13px;
+    margin: 0;
+    color: #fff;
+    -webkit-line-clamp: 2;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    width: 98%;
+    line-height: 17px;
+    text-align: left;
+    margin-top: 6px;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__red-link {
+    color: #6b6b6b;
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__message {
+    text-align: left;
+    min-height: 15px;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__message__footer {
+    color: rgb(109, 107, 107);
+    font-size: 12px;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__message img {
+    width: 38px;
+    height: 38px;
+    margin-top: -19px;
+    margin-bottom: 20px;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__button {
+    line-height: 17px;
+    text-transform: uppercase;
+    min-height: 15px;
+    background-color: #fff;
+    max-width: 21%;
+    min-width: 14%;
+    vertical-align: middle;
+    border-radius: 20px;
+    padding: 10px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: #4caf50;
+    position: absolute;
+    right: 20px;
+}
+.pl-1a07bf653e9b175030ac66b6a1052465__text-button {
+    margin: 0;
+    -webkit-line-clamp: 1;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+}
+@media (max-width: 414px) {
+    .pl-1a07bf653e9b175030ac66b6a1052465__header__content {
+        width: 54%;
+    }
+    .pl-1a07bf653e9b175030ac66b6a1052465__button {
+        font-size: 10px;
+    }
+}
+@media (max-width: 375px) {
+    .pl-1a07bf653e9b175030ac66b6a1052465__finlink {
+        padding: 20px 10px;
+    }
+    .pl-1a07bf653e9b175030ac66b6a1052465__header__content {
+        width: 52%;
+    }
+}
+@media (max-width:360px) {
+    .pl-1a07bf653e9b175030ac66b6a1052465__header__content {
+        width: 50%;
+    }
+}
+@media (max-width:320px) {
+    .pl-1a07bf653e9b175030ac66b6a1052465__button {
+        font-size: 9px;
+        right: 10px;
+        max-width: 22%;
+    }
+    .pl-1a07bf653e9b175030ac66b6a1052465__header__content {
+        width: 47%;
+    }
+}
+@media (max-width: 260px) {
+    a.pl-1a07bf653e9b175030ac66b6a1052465__finlink {
+        padding: 6px;
+    }
+    .pl-1a07bf653e9b175030ac66b6a1052465__img {
+        width: 40px;
+        height: 40px;
+    }
+    .pl-1a07bf653e9b175030ac66b6a1052465__close {
+        top: 3px;
+        right: 8px;
+    }
+    .pl-1a07bf653e9b175030ac66b6a1052465__button {
+        padding: 7px;
+        font-size: 10px;
+    }
+    .pl-1a07bf653e9b175030ac66b6a1052465__header__content {
+        padding: 7px 5px 5px 5px;
+    }
+    .pl-1a07bf653e9b175030ac66b6a1052465__title {
+        font-size: 12px;
+        line-height: 14px;
+        text-align: left;
+    }
+    .pl-1a07bf653e9b175030ac66b6a1052465__message__desc {
+        font-size: 12px;
+    }
+    .pl-1a07bf653e9b175030ac66b6a1052465__content .pl-1a07bf653e9b175030ac66b6a1052465__message {
+        padding: 0 10px 0px 20px;
+        line-height: 15px;
+    }
+    .pl-1a07bf653e9b175030ac66b6a1052465__left {
+        margin-right: 0px;
+    }
+    .pl-1a07bf653e9b175030ac66b6a1052465__message img {
+        width: 30px;
+        height: 30px;
+        margin-top: -4px;
+        margin-bottom: 0px;
+    }
+}
+.preview-creative .pl-1a07bf653e9b175030ac66b6a1052465__content {
+    display: inline-block;
+}</style><style>@charset "UTF-8";
 @-webkit-keyframes pl-1a07bf653e9b175030ac66b6a1052465__bounce {
   from,
   20%,
@@ -945,7 +1289,7 @@
     transform: translate3d(0, 0, 0);
   }
 }
-.pl-1a07bf653e9b175030ac66b6a1052465__bounceInUp {
+.bounceInUp {
   -webkit-animation-name: pl-1a07bf653e9b175030ac66b6a1052465__bounceInUp;
   animation-name: pl-1a07bf653e9b175030ac66b6a1052465__bounceInUp;
 }
@@ -3063,654 +3407,38 @@
     animation-iteration-count: 1 !important;
   }
 }
-</style><style>.pl-1a07bf653e9b175030ac66b6a1052465__link {
-    text-decoration: none;
-    color: #1275ec;
-    border: 0;
-    outline: none
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__link img {
-    border: none
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__content {
-    vertical-align: top;
-    position: fixed;
-    padding: 0;
-    width: 300px;
-    box-sizing: border-box;
-    left: 0;
-    right: 0;
-    margin: auto;
-    height: 570px;
-    top: 0;
-    background: #000000db;
-    align-items: center;
-    justify-content: center;
-    font-family: "Roboto";
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__btn-close {
-    position: absolute;
-    top: 9px;
-    right: -3px;
-    z-index: 999;
-    width: 50px;
-    height: 50px;
-    text-align: center;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__close {
-    width: 14px;
-    height: 14px;
-    cursor: pointer;
-    padding: 3px;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__finlink {
-    text-decoration: none;
-    color: #157efb;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__btn-clo {
-    position: relative;
-    z-index: 10000;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__link {
-    text-decoration: none;
-    color: #1275ec;
-    border: 0;
-    outline: none
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__link img {
-    border: none
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__content-block {
-    display: inline-block;
-    vertical-align: top;
-    width: 93%;
-    max-width: 363px;
-    min-height: 100px;
-    font-size: 13px;
-    text-align: left;
-    white-space: normal;
-    z-index: 3;
-    color: #000;
-    justify-content: space-between;
-    background: #fff;
-    position: relative;
-    box-sizing: border-box;
-    font-family: 'Roboto';
-    box-shadow: 0 0 7px 1px #a1a1a1a6;
-    align-items: center;
-    border-radius: 5px;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__content-block::after {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    right: 0;
-    margin: auto;
-    border-radius: 10px;
-    z-index: -9;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__desc {
-    letter-spacing: 0.5;
-    border-radius: 5px;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__top {
-    display: -webkit-flex;
-    display: -ms-flex;
-    display: flex;
-    align-items: center;
-    padding: 16px 12px 0px 12px;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__line {
-    width: 100%;
-    height: 1.5px;
-    background: #5e5e5e;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__message-icon {
-    vertical-align: middle;
-    width: 48px;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__content .pl-1a07bf653e9b175030ac66b6a1052465__content .pl-1a07bf653e9b175030ac66b6a1052465__message p {
-    line-height: 17px;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__content .pl-1a07bf653e9b175030ac66b6a1052465__message {
-    line-height: 17px;
-    margin: 6px 0 0px;
-    position: relative;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__content .pl-1a07bf653e9b175030ac66b6a1052465__action {
-    border-top: 1px solid rgb(153, 153, 153);
-    text-align: center;
-    color: #1275ec;
-    font-weight: 700;
-    font-size: 18px;
-    padding: 23px 0;
-    display: block
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__wrap {
-    position: relative;
-    width: auto;
-    height: 100%;
-    min-height: 100%;
-    font-size: 0;
-    line-height: 0;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    font-family: 'Roboto';
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__btn {
-    margin-right: 40px;
-    color: #ff3b30;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 18px;
-    margin: 10px 40px 10px 0;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__btn-second {
-    color: #157efb;
-    font-weight: 600;
-     line-height: 18px;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__btn-block {
-    display: flex;
-    position: relative;
-    padding: 0px 0px 10px 18px;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__bg {
-    display: block;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    width: 100%;
-    height: auto;
-    z-index: 1
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__fade {
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: auto;
-    height: auto;
-    background-color: #000;
-    opacity: .2;
-    z-index: 2
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__helper {
-    display: inline-block;
-    vertical-align: middle;
-    width: 0;
-    height: 100%;
-    font-size: 0;
-    line-height: 0
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__rtl .pl-1a07bf653e9b175030ac66b6a1052465__content {
-    text-align: right
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__sep {
-    margin: 0 20px;
-    color: #888;
-    font-size: 22px
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__header_img {
-    width: 100%;
-}
-@media screen and (orientation:portrait) {
-    .pl-1a07bf653e9b175030ac66b6a1052465__bg {
-        width: auto;
-        height: 100%
-    }
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__header__content {
-    width: 22%;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__left {
-    display: flex;
-    align-items: center;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__right {
-    display: flex;
-    width: 40%;
-    justify-content: flex-end;
-    font-size: 14px;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__title {
-    margin-left: 10px;
-    font-size: 14px;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__name__abonem {
-    font-size: 16px;
-    font-weight: 900;
-    color: #000;
-    margin: 0;
-    position: relative;
-    vertical-align: middle;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__message__desc {
-    font-size: 15px;
-    margin: 6px 0px;
-    color: #000;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__message__grey {
-    color: #000;
-    font-weight: bold;
-    margin: 0px 0px 5px 0px;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__red-link {
-    color: #6b6b6b;
-    text-decoration: none;
-    font-size: 14px;
-    margin: 0;
-    margin-bottom: 5px;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__message {
-    text-align: left;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__message__footer {
-    color: rgb(109, 107, 107);
-    font-size: 12px;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__pic {
-    float: left;
-    margin: 35px 3px 0px 15px;
-}
-.pl-1a07bf653e9b175030ac66b6a1052465__red:after {
-    content: '';
-    position: absolute;
-    background: url(//cdn.cloudpiko.com/sb/notifications/dating/default/global/android_system/4/img/number.png) center center / cover no-repeat;
-    width: 25px;
-    height: 25px;
-    left: -7px;
-    top: -7px;
-}</style></head><body><div class="pl-1a07bf653e9b175030ac66b6a1052465__wrap">
+</style></head><body><div class="pl-1a07bf653e9b175030ac66b6a1052465__wrap">
     <link href="//fonts.googleapis.com/css?family=Roboto:300,400,700&amp;display=swap" rel="stylesheet">
-    <link href="//fonts.googleapis.com/css2?family=Roboto:wght@300&amp;display=swap" rel="stylesheet">
-    <a href="#" target="_blank" class="pl-1a07bf653e9b175030ac66b6a1052465__link pl-1a07bf653e9b175030ac66b6a1052465__finlink">
-        <div class="pl-1a07bf653e9b175030ac66b6a1052465__content" style="display: flex;">
-            <div class="pl-1a07bf653e9b175030ac66b6a1052465__closelink pl-1a07bf653e9b175030ac66b6a1052465__btn-close">
-                <img src="//cdn.cloudpiko.com/sb/notifications/dating/default/global/android_system/4/img/close.svg" alt="" class="pl-1a07bf653e9b175030ac66b6a1052465__close">
-            </div>
-
-            <div class="pl-1a07bf653e9b175030ac66b6a1052465__content-block">
-                <div class="pl-1a07bf653e9b175030ac66b6a1052465__red"></div>
-
-                <div class="pl-1a07bf653e9b175030ac66b6a1052465__desc">
-                    <div class="pl-1a07bf653e9b175030ac66b6a1052465__pic">
-                        <img class="pl-1a07bf653e9b175030ac66b6a1052465__message-icon" src="//cdn.cloudpiko.com/sb/notifications/dating/default/global/android_system/4/img/update-icon.png" alt="">
-                    </div>
-                    <div class="pl-1a07bf653e9b175030ac66b6a1052465__top">
-                        <div class="pl-1a07bf653e9b175030ac66b6a1052465__message">
-                            <span class="pl-1a07bf653e9b175030ac66b6a1052465__name__abonem" id="a1">You have (2) new messages</span>
-                            <p class="pl-1a07bf653e9b175030ac66b6a1052465__message__desc" id="a2">Anna: Don't show this to anyone😘</p>
-                        </div>
-                    </div>
-                    <div class="pl-1a07bf653e9b175030ac66b6a1052465__btn-block">
-                        <p class="pl-1a07bf653e9b175030ac66b6a1052465__btn pl-1a07bf653e9b175030ac66b6a1052465__btn-second">
-                            <span class="pl-1a07bf653e9b175030ac66b6a1052465__btn-blue" id="a3">Reply</span>
-                        </p>
-                        <p class="pl-1a07bf653e9b175030ac66b6a1052465__btn pl-1a07bf653e9b175030ac66b6a1052465__btn-clo pl-1a07bf653e9b175030ac66b6a1052465__closelink" id="a4">Mark as read</p>
-                    </div>
-                </div>
-            </div>
-
+    <div class="pl-1a07bf653e9b175030ac66b6a1052465__content pl-1a07bf653e9b175030ac66b6a1052465__animated pl-1a07bf653e9b175030ac66b6a1052465__bounceInDown pl-1a07bf653e9b175030ac66b6a1052465__delay-0s" style="display: inline-block;">
+        <div class="pl-1a07bf653e9b175030ac66b6a1052465__closelink">
+            <img src="//cdn.cloudpiko.com/sb/ssp/utility/social-media/whatsapp/img/close.svg" alt="" class="pl-1a07bf653e9b175030ac66b6a1052465__close">
         </div>
-    </a>
-</div><script type="text/javascript" src="//cdn.cloudpiko.com/sb/notifications/dating/default/global/android_system/4/js/jquery.min.js"></script><script type="text/javascript">(function(){ function contentOpen() {
-    let overlay = document.querySelector('.pl-1a07bf653e9b175030ac66b6a1052465__content');
-    overlay.style.display = 'flex';
-    // overlay.classList.add('pl-1a07bf653e9b175030ac66b6a1052465__animated', 'pl-1a07bf653e9b175030ac66b6a1052465__bounceInUp', 'pl-1a07bf653e9b175030ac66b6a1052465__delay-0s')
-}
-contentOpen()
+        <a href="#" target="_blank" class="pl-1a07bf653e9b175030ac66b6a1052465__finlink">
+            <img class="pl-1a07bf653e9b175030ac66b6a1052465__img" src="https://cdn.storageimagedisplay.com/sspi/0d/b6/c5/0db6c5cc704f93abda68c74b2e015c980ffefea7190ea05f874d96d200f2e43b.png" alt="">
+
+            <div class="pl-1a07bf653e9b175030ac66b6a1052465__header__content">
+                <div class="pl-1a07bf653e9b175030ac66b6a1052465__title">අනුෂා - Colombo</div>
+                <p class="pl-1a07bf653e9b175030ac66b6a1052465__message__desc">🎥 වීඩියෝව (2:31)</p>
+            </div>
+
+            <div class="pl-1a07bf653e9b175030ac66b6a1052465__button"><p class="pl-1a07bf653e9b175030ac66b6a1052465__text-button">විවෘත</p></div>
+
+        </a>
+
+    </div>
+
+</div><script type="text/javascript">(function(){ function contentOpen() {
+  var overlay = document.querySelector('.pl-1a07bf653e9b175030ac66b6a1052465__content');
+  overlay.style.display = 'inline-block';
+  overlay.classList.add('pl-1a07bf653e9b175030ac66b6a1052465__animated', 'pl-1a07bf653e9b175030ac66b6a1052465__bounceInDown', 'pl-1a07bf653e9b175030ac66b6a1052465__delay-0s')
+  };
+  contentOpen();
 
 
-let display = document.querySelector(".pl-1a07bf653e9b175030ac66b6a1052465__content");
-let buttons = document.querySelectorAll(".pl-1a07bf653e9b175030ac66b6a1052465__closelink");
-buttons.forEach(button => button.addEventListener("click", function (evt) {
+  let closeSb = document.querySelector('.pl-1a07bf653e9b175030ac66b6a1052465__closelink');
+  let overlay = document.querySelector('.pl-1a07bf653e9b175030ac66b6a1052465__content');
+  closeSb.onclick = function(evt) {
     evt.preventDefault();
-    display.style.display = 'none';
-}));
-
-
-
-function getURLParameter(name) {
-    return decodeURIComponent(
-        (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, null])[1] || ''
-    );
-}
-
-
-function replace_text(lang, text) {
-    x = document.getElementById(text);
-    if (x) {
-        x.innerHTML = translation[lang][text];
-    } else {
-        console.log("element not Found: " + text);
-    }
-}
-
-function alert_string(lang, text) {
-    return translation[lang][text] + "\n\n";
-}
-
-function translation_available(lang) {
-    if (translation[lang]) {
-        return lang;
-    } else {
-        console.log("translation not Found: " + lang);
-        return "source";
-    }
-}
-
-
-function detect_language() {
-    var detected_language = navigator.language;
-    if (detected_language.length > 3) {
-        detected_language = detected_language[0] + detected_language[1];
+      overlay.style.display = 'none';
     };
-
-    if (jQuery.inArray(detected_language, ['ar', 'he', 'fa', 'ur']) >= 0) {
-        $('html').attr('DIR', 'RTL');
-    }
-    return translation_available(detected_language);
-}
-var translation = {
-    source: {
-        a1: "You have (2) new messages",
-        a2: "Anna: Don't show this to anyone😘",
-        a3: "Reply",
-        a4: "Mark as read",
-    },
-    en: {
-        a1: "You have (2) new messages",
-        a2: "Anna: Don't show this to anyone😘",
-        a3: "Reply",
-        a4: "Mark as read",
-    },
-
-    fr: {
-        a1: "Vous avez (2) nouveaux messages",
-        a2: "Anna : ne montre pas ça à personne😘",
-        a3: "Réponse",
-        a4: "Marquer comme lu",
-    },
-    es: {
-        a1: "Tienes (2) mensajes nuevos",
-        a2: "Anna: No le muestres esto a nadie😘",
-        a3: "Respuesta",
-        a4: "Marcar como leído",
-    },
-
-    de: {
-        a1: "Sie haben (2) neue Nachrichten",
-        a2: "Anna: Zeig das niemandem😘",
-        a3: "Antwort",
-        a4: "Als gelesen markieren",
-    },
-
-    it: {
-        a1: "Hai (2) nuovi messaggi",
-        a2: "Anna: Non mostrarlo a nessuno😘",
-        a3: "Rispondere",
-        a4: "Segna come già letto",
-    },
-
-    pt: {
-        a1: "Você tem (2) novas mensagens",
-        a2: "Anna: Não mostre isso para ninguém😘",
-        a3: "ReResponderpetir",
-        a4: "Marcar como lido",
-    },
-    ar: {
-        a1: "لديك (2) رسائل جديدة",
-        a2: "آنا: لا تظهر هذا لأي شخص",
-        a3: "رد",
-        a4: "وضع علامة كمقروء",
-    },
-    no: {
-        a1: "Du har (2) nye meldinger",
-        a2: "Anna: Ikke vis dette til noen😘",
-        a3: "Svare",
-        a4: "Merk som lest",
-    },
-    sv: {
-        a1: "Du har (2) nya meddelanden",
-        a2: "Anna: Visa inte det här för någon😘",
-        a3: "Svar",
-        a4: "Markera som läst",
-    },
-    ru: {
-        a1: "У вас есть (2) новых сообщения",
-        a2: "Анна: Не показывай это никому😘",
-        a3: "Ответить",
-        a4: "Отметить как прочитанное",
-    },
-    zh: {
-        a1: "你有 (2) 条新消息",
-        a2: "安娜：不要给任何人看这个😘",
-        a3: "回复",
-        a4: "标记为已读",
-    },
-    ja: {
-        a1: "(2) 件の新しいメッセージがあります",
-        a2: "アンナ: これは誰にも見せないでください😘",
-        a3: "返事",
-        a4: "既読にする",
-    },
-    ko: {
-        a1: "(2)개의 새 메시지가 있습니다.",
-        a2: "안나: 아무에게도 보여주지 마세요😘",
-        a3: "회신하다",
-        a4: "읽은 것으로 표시",
-    },
-    nl: {
-        a1: "Je hebt (2) nieuwe berichten",
-        a2: "Anna: Laat dit aan niemand zien😘",
-        a3: "Antwoord",
-        a4: "Markeren als gelezen",
-    },
-    ms: {
-        a1: "Anda mempunyai (2) mesej baharu",
-        a2: "Anna: Jangan tunjukkan ini kepada sesiapa😘",
-        a3: "Balas",
-        a4: "Tandai sebagai dibaca",
-    },
-    id: {
-        a1: "Anda memiliki (2) pesan baru",
-        a2: "Anna: Jangan tunjukkan ini pada siapapun😘",
-        a3: "Membalas",
-        a4: "Tandai sebagai telah dibaca",
-    },
-    th: {
-        a1: "คุณมี (2) ข้อความใหม่",
-        a2: "แอนนา: อย่าเอาสิ่งนี้ให้ใครดู😘",
-        a3: "ตอบกลับ",
-        a4: "ทำเครื่องหมายว่าอ่านแล้ว",
-    },
-    el: {
-        a1: "Έχετε (2) νέα μηνύματα",
-        a2: "Άννα: Μην το δείχνεις αυτό σε κανέναν😘",
-        a3: "Απάντηση",
-        a4: "Επισήμανση ως αναγνωσμένου",
-    },
-    hu: {
-        a1: "(2) új üzenete van",
-        a2: "Anna: Ne mutasd ezt senkinek😘",
-        a3: "Válasz",
-        a4: "Megjelölés olvasottként",
-    },
-    pl: {
-        a1: "Masz (2) nowe wiadomości",
-        a2: "Anna: Nikomu tego nie pokazuj😘",
-        a3: "Odpowiedź",
-        a4: "Oznacz jako przeczytane",
-    },
-    cs: {
-        a1: "Anna",
-        a2: "Zlato, chci tě tak šukat!",
-        a3: "Odpověď",
-        a4: "Označit jako přečtené",
-    },
-    vi: {
-        a1: "Bạn có (2) tin nhắn mới",
-        a2: "Anna: Không cho ai xem cái này😘",
-        a3: "Đáp lại",
-        a4: "Đánh dấu là đã đọc",
-    },
-    tr: {
-        a1: "2 yeni mesajınız var",
-        a2: "Anna: Bunu kimseye gösterme😘",
-        a3: "Cevap vermek",
-        a4: "Okundu olarak işaretle",
-    },
-
-    ro: {
-        a1: "Aveți (2) mesaje noi",
-        a2: "Anna: Nu arăta asta nimănui😘",
-        a3: "Răspuns",
-        a4: "Marcați ca citit",
-    },
-
-    fi: {
-        a1: "Sinulla on (2) uutta viestiä",
-        a2: "Anna: Älä näytä tätä kenellekään😘",
-        a3: "Vastaa",
-        a4: "Merkitse luetuksi",
-    },
-    da: {
-        a1: "Du har (2) nye beskeder",
-        a2: "Anna: Vis ikke dette til nogen😘",
-        a3: "Svar",
-        a4: "Markér som læst",
-    },
-    fil: {
-        a1: "Mayroon kang (2) bagong mensahe",
-        a2: "Anna: Huwag mong ipakita ito kahit kanino😘",
-        a3: "Sumagot",
-        a4: "Markahan bilang nabasa na",
-    },
-    hr: {
-        a1: "Imate (2) nove poruke",
-        a2: "Anna: Ne pokazuj ovo nikome😘",
-        a3: "Odgovor",
-        a4: "Označi kao pročitano",
-    },
-    lt: {
-        a1: "Turite (2) naujus pranešimus",
-        a2: "Ana: niekam to nerodyk😘",
-        a3: "Atsakyti",
-        a4: "Pažymėti kaip skaitytą",
-    },
-
-    hi: {
-        a1: "आपके पास (2) नए संदेश हैं",
-        a2: "अन्ना: इसे किसी को मत दिखाओ",
-        a3: "जवाब",
-        a4: "पढ़े के रूप में चिह्नित करें",
-    },
-    ur: {
-        a1: "آپ کے پاس (2) نئے پیغامات ہیں",
-        a2: "پرینکا: یہ کسی کو مت دکھانا😘",
-        a3: "جواب دیں۔",
-        a4: "چھپائیں",
-    },
-    mr: {
-        a1: "तुमच्याकडे (2) नवीन संदेश आहेत",
-        a2: "प्रियांका: हे कोणाला दाखवू नकोस😘",
-        a3: "उत्तर द्या",
-        a4: "लपवा",
-    },
-    gu: {
-        a1: "તમારી પાસે (2) નવા સંદેશા છે",
-        a2: "પ્રિયંકા: આ કોઈને બતાવશો નહીં😘",
-        a3: "જવાબ",
-        a4: "વાંચેલા તરીકે ચિહ્નિત કરો",
-    },
-    kn: {
-        a1: "ನೀವು (2) ಹೊಸ ಸಂದೇಶಗಳನ್ನು ಹೊಂದಿದ್ದೀರಿ",
-        a2: "ಪ್ರಿಯಾಂಕಾ: ಇದನ್ನು ಯಾರಿಗೂ ತೋರಿಸಬೇಡ😘",
-        a3: "ಪ್ರತ್ಯುತ್ತರ",
-        a4: "ಓದಿದಂತೆ ಗುರುತಿಸಿ",
-    },
-    bn: {
-        a1: "আপনার (2) নতুন বার্তা আছে",
-        a2: "প্রিয়াঙ্কা: এটা কাউকে দেখাবেন না😘",
-        a3: "উত্তর দিন",
-        a4: "লুকান",
-    },
-    ml: {
-        a1: "നിങ്ങൾക്ക് (2) പുതിയ സന്ദേശങ്ങളുണ്ട്",
-        a2: "പ്രിയങ്ക: ഇത് ആരോടും കാണിക്കരുത്😘",
-        a3: "മറുപടി",
-        a4: "മറയ്ക്കുക",
-    },
-    or: {
-        a1: "ଆପଣଙ୍କର (2) ନୂତନ ବାର୍ତ୍ତା ଅଛି",
-        a2: "ପ୍ରିୟଙ୍କା: ଏହାକୁ କାହାକୁ ଦେଖାନ୍ତୁ ନାହିଁ",
-        a3: "ଉତ୍ତର ଦିଅ",
-        a4: "ଲୁଚାନ୍ତୁ |",
-    },
-    te: {
-        a1: "మీకు (2) కొత్త సందేశాలు ఉన్నాయి",
-        a2: "ప్రియాంక: దీన్ని ఎవరికీ చూపించవద్దు😘",
-        a3: "ప్రత్యుత్తరం",
-        a4: "చదివినట్లు గుర్తు పెట్టు",
-    },
-    pa: {
-        a1: "ਤੁਹਾਡੇ ਕੋਲ (2) ਨਵੇਂ ਸੁਨੇਹੇ ਹਨ",
-        a2: "ਪ੍ਰਿਅੰਕਾ: ਇਹ ਕਿਸੇ ਨੂੰ ਨਾ ਦਿਖਾਓ😘",
-        a3: "ਜਵਾਬ",
-        a4: "ਪੜ੍ਹੇ ਵਜੋਂ ਮਾਰਕ ਕਰੋ",
-    },
-    sw: {
-        a1: "Una (2) ujumbe mpya",
-        a2: "Priyanka: Usionyeshe hii kwa mtu yeyote😘",
-        a3: "Jibu",
-        a4: "kujificha",
-    },
-    ta: {
-        a1: "உங்களிடம் (2) புதிய செய்திகள் உள்ளன",
-        a2: "பிரியங்கா: இதை யாரிடமும் காட்டாதே😘",
-        a3: "பதில்",
-        a4: "படித்ததாகக் குறி",
-    },
-
-};
-
-function translate() {
-    var detected_language = detect_language();
-    for (y in translation["source"]) {
-        replace_text(detected_language, y);
-
-    }
-
-}
-window.onload = translate()})()</script></body></html>
-
-
-
-<aside class="kc-patreon-panel" aria-label="Optional ad-free membership">
-        <div class="kc-patreon-summary">
-            <div class="kc-patreon-copy">
-                <p class="kc-patreon-title">Prefer reading without ads?</p>
-                <p class="kc-patreon-caption">Optional Patreon membership from $1.</p>
-            </div>
-            <div class="kc-patreon-actions">
-                <a class="kc-patreon-join" href="https://www.patreon.com/Kingcomix">Go ad-free <span aria-hidden="true">↗</span></a>
-                <a class="kc-patreon-login" href="https://kingcomix.com/patreon-flow/?patreon-login=yes&amp;patreon-final-redirect=https%3A%2F%2Fkingcomix.com">Member login</a>
-            </div>
-        </div>
-        <details class="kc-patreon-help">
-            <summary>How it works</summary>
-            <ol class="kc-patreon-steps">
-                <li><strong>Optional upgrade.</strong> To read without ads, choose a paid membership on Patreon.</li>
-                <li><strong>Return here and log in.</strong> Use the same Patreon account to connect your membership to this site.</li>
-            </ol>
-            <p class="kc-patreon-goal"><strong>Future goal:</strong> With enough ongoing support, we hope to create original comics and make them free for everyone.</p>
-            <a class="kc-patreon-help-link" href="https://kingcomix.com/login-whit-patreon/">Member login page</a>
-        </details>
-            </aside>
+})()</script></body></html>
